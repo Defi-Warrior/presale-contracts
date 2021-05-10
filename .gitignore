@@ -1,0 +1,7 @@
+### Solidity###
+# depedencies
+.deps
+
+# misc
+.DS_Store
+artifacts
