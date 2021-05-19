@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {Ownable} from "Ownable.sol";
-import {ERC721} from "ERC721.sol";
-import {ERC721EnumerableSimple} from "./ERC721EnumerableSimple.sol";
+import {Ownable} from "./utils/Ownable.sol";
+import {ERC721} from "./extensions/ERC721.sol";
+import {ERC721EnumerableSimple} from "./extensions/ERC721EnumerableSimple.sol";
 
 contract NFTToken is ERC721EnumerableSimple, Ownable {
     // Maximum amount of NFTToken in existance. Ever.
@@ -16,7 +16,7 @@ contract NFTToken is ERC721EnumerableSimple, Ownable {
     // Bsae URI of NFTToken's metadata
     string private baseURI;
 
-    constructor() ERC721("RAKUZA", "RAKUZA") {}
+    constructor() ERC721("Smart Copyright", "CORI") {}
 
     function tokensOfOwner(address _owner) external view returns (uint[] memory) {
         uint tokenCount = balanceOf(_owner);

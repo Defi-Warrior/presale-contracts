@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ERC721} from "ERC721.sol";
-import {IERC165} from "extensions/IERC165.sol";
-import {IERC721Enumerable} from "extensions/IERC721Enumerable.sol";
+import {ERC721} from "./ERC721.sol";
+import {IERC165} from "./IERC165.sol";
+import {IERC721Enumerable} from "./IERC721Enumerable.sol";
 
 /**
  * @dev This is a fork of openzeppelin ERC721Enumerable. It is gas-optimizated for NFT collection
