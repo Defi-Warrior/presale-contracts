@@ -34,6 +34,9 @@ contract Presale is Ownable {
     address private DAI_CONTRACT = 0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3;
 
     enum TokenType {USDT, BUSD, DAI}
+    enum Round {SEEDING, PRIVATE}
+
+    IERC20 public token;
 
     modifier onlyInSeedingRound() {
         require(seedingStart >= block.number && seedingEnd <= block.number, "Seeding round is not started or it has ended");
@@ -50,60 +53,46 @@ contract Presale is Ownable {
         PRIVATE_SALE_RATE = privateSaleRate_;
     }
 
-    function addWhitelistForSeedingRound(address[] memory whilelists_, uint256[] memory maxPurchases_) public onlyOwner {
-        for (uint i = 0; i < whilelists_.length; i++) {
+    function addWhitelistForSeedingRound(address[] memory whilelists_, uint256[] memory maxPurchases_, Round roundType) public onlyOwner {
+        if (roundType == Round.SEEDING) {
+            for (uint i = 0; i < whilelists_.length; i++) {
             _seedingAllowances[whilelists_[i]] = maxPurchases_[i];
+            }
         }
-    }
-
-    function addWhitelistForPrivateRound(address[] memory whilelists_, uint256[] memory maxPurchases_) public onlyOwner {
-        for (uint i = 0; i < whilelists_.length; i++) {
+        else if (roundType == Round.PRIVATE) {
+            for (uint i = 0; i < whilelists_.length; i++) {
             _privateSaleAllowances[whilelists_[i]] = maxPurchases_[i];
+            }
+        }
+        else {
+            revert("Invalid round type");
         }
     }
 
-    function deposit(address token, uint256 amount, mapping(address=>uint256) storage allowances, uint256 RATE) internal {
-        IERC20(token).transferFrom(address(this), address(this), amount);
+    function deposit(uint256 amount, mapping(address=>uint256) storage allowances, uint256 RATE, TokenType tokenType) internal {
+        if (tokenType == TokenType.USDT)
+            token = IERC20(USDT_CONTRACT);
+
+        else if (tokenType == TokenType.BUSD) 
+            token = IERC20(BUSD_CONTRACT);
+
+        else if (tokenType == TokenType.DAI)
+            token = IERC20(DAI_CONTRACT);
+
+        token.transferFrom(address(this), address(this), amount);
         allowances[_msgSender()] -= amount;
         uint256 totalSold = amount * RATE;
         _balances[_msgSender()] += totalSold;
         totalTokenSold += totalSold;
     }
 
-    function depositSeedingRound(uint256 amount, TokenType tokenType) public onlyInSeedingRound {
+    function userDeposit(uint256 amount, TokenType tokenType, Round roundType) public {
         require(amount > 0, "Invest amount must larger than zero");
         require(_seedingAllowances[_msgSender()] >= amount, "Invalid address or the invest amount is higher than allowed");
 
-        if (tokenType == TokenType.USDT) {
-            deposit(USDT_CONTRACT, amount, _seedingAllowances, SEEDING_RATE);
-        }
-        else if (tokenType == TokenType.BUSD) {
-            deposit(BUSD_CONTRACT, amount, _seedingAllowances, SEEDING_RATE);
-        } 
-        else if (tokenType == TokenType.DAI) {
-            deposit(DAI_CONTRACT, amount, _seedingAllowances, SEEDING_RATE);
-        }
-        else {
-            revert("Invalid token type");
-        }
-    }
-
-
-    function depositPrivateSaleRound(uint256 amount, TokenType tokenType) public onlyInPrivateSaleRound {
-        require(amount > 0, "Invest amount must larger than zero");
-        require(_privateSaleAllowances[_msgSender()] >= amount, "Invalid address or the invest amount is higher than allowed");
-
-        if (tokenType == TokenType.USDT) {
-            deposit(USDT_CONTRACT, amount, _privateSaleAllowances, PRIVATE_SALE_RATE);
-        }
-        else if (tokenType == TokenType.BUSD) {
-            deposit(BUSD_CONTRACT, amount, _privateSaleAllowances, PRIVATE_SALE_RATE);
-        } 
-        else if (tokenType == TokenType.DAI) {
-            deposit(DAI_CONTRACT, amount, _privateSaleAllowances, PRIVATE_SALE_RATE);
-        }
-        else {
-            revert("Invalid token type");
-        }
+        if (roundType == Round.SEEDING)
+            deposit(amount, _seedingAllowances, SEEDING_RATE, tokenType);
+        if (roundType == Round.PRIVATE)
+            deposit(amount, _privateSaleAllowances, PRIVATE_SALE_RATE, tokenType);
     }
 }
