@@ -7,3 +7,4 @@
 artifacts
 truffle/
 build/
+bin/
