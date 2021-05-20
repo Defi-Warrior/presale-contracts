@@ -52,7 +52,7 @@ contract Locker is Ownable{
 
     /**
      * @dev Sets the values for {seedingRoundWhitelist} or {privateRoundWhitelist},
-     * the list is depends on value of {round}, valid values: [0: SeedingRound, 1: PrivateSaleRound] 
+     * the list type is depends on value of {round}, valid values are: [0: SeedingRound, 1: PrivateSaleRound] 
      */
     function addWhitelist(address[] memory addresses, RoundType round) external onlyOwner {
         if (round == RoundType.SEEDING) {
@@ -69,7 +69,7 @@ contract Locker is Ownable{
     }
 
      /**
-     * @dev check the value of {source} revert transaction if this address is in one of the two whitelist and still in lock period
+     * @dev check the value of {source} address, revert transaction if this address is in one of the two whitelist and still in lock period
      */
     function checkLock(address source) external {
         if (seedingRoundWhitelist[source]) {
