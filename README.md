@@ -1,5 +1,4 @@
-# NFT-BLOCKCHAIN
-## BAP IT CO., JSC
+# Smart Copyright
 
 ### Install project
 - Install solc
