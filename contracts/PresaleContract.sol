@@ -24,10 +24,9 @@ struct PresaleSetting {
 
 interface ILocker {
   /**
-   * @dev Fails if transaction is not allowed. Otherwise returns the penalty.
-   * Returns a bool and a uint16, bool clarifying the penalty applied, and uint16 the penaltyOver1000
+   * @dev lock the transfer function of {source} for a specific duration
    */
-  function lock(address source, uint256 start, uint256 end) external returns (bool);
+  function lock(address source, uint256 start, uint256 end) external;
 }
 
 contract Presale is Ownable {
@@ -54,13 +53,19 @@ contract Presale is Ownable {
 
     PresaleSetting public currentSetting;
 
-    constructor() {
+    // Smart Copyright payment
+    ILocker public locker;
+
+
+    constructor(address lockerAddr) {
         SEEDING_SETTING = PresaleSetting("Seeding", 100*10**18, 9119140, 10119140, 0, 200000000*10**18, 1000, 15);
         FIRST_ROUND_SETTING = PresaleSetting("Private Sale Round 1", 200*10**18, 0, 0, 0, 200000000*10**18, 666, 12);
         SECOND_ROUND_SETTING = PresaleSetting("Private Sale Round 2", 300*10**18, 0, 0, 0, 100000000*10**18, 666, 12);
         THRID_ROUND_SETTING = PresaleSetting("Private Sale Round 3", 400*10**18, 0, 0, 0, 100000000*10**18, 666, 12);
 
         CORI_TOKEN = IERC20(CORI_CONTRACT);
+
+        locker = ILocker(lockerAddr);
     }
 
     function updatePresaleSetting() public {
@@ -78,10 +83,17 @@ contract Presale is Ownable {
     }
 
     function deposit(address spender, uint256 amount, address tokenAddr) internal {
-        stableCoin = IERC20(tokenAddr);
-        stableCoin.transferFrom(spender, address(this), amount);
         uint256 sellAmount = amount * currentSetting.PRICE;
+        stableCoin = IERC20(tokenAddr);
+
+        stableCoin.transferFrom(spender, address(this), amount);
+
+        locker.lock(spender, currentSetting.start, currentSetting.end + currentSetting.lockDuration);
+
+        CORI_TOKEN.transfer(spender, sellAmount);
+
         balances[_msgSender()] += sellAmount;
+        
         totalTokenSold += sellAmount;
     }
 

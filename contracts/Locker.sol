@@ -13,14 +13,25 @@ struct LockDuration {
     uint256 end;
 }
 
-contract Locker is Ownable{
+contract Locker is Ownable {
     // contains addresses that were in the seeding, private sale or marketing campaign
     // these addresses will be locked from sending their token to other addresses in different durations
     // these lock durations will be stored in lockRecords
     mapping(address => bool) public whitelist;
     mapping(address => LockDuration) lockRecords;
 
+    address public presaleAddress;
+
+    modifier onlyPresaleAddress() {
+        require(_msgSender() == presaleAddress, "Invalid caller, must be presale address");
+        _;
+    }
+
     constructor() {}
+
+    function setPresaleAddress(address newAddr) public onlyOwner {
+        presaleAddress = newAddr;
+    }
 
     /**
      * @dev Sets the values for {seedingRoundWhitelist} or {privateRoundWhitelist},
@@ -35,12 +46,21 @@ contract Locker is Ownable{
         }
     }
 
+    /**
+     * @dev Sets the values for {seedingRoundWhitelist} or {privateRoundWhitelist},
+     * the length of addresses and starts, ends list must equal
+     */
+    function lock(address addr, uint256 start, uint256 end) external onlyPresaleAddress {
+        whitelist[addr] = true;
+        lockRecords[addr] = LockDuration(start, end);
+    }
+
      /**
      * @dev check the value of {source} address, revert transaction if this address is in one of the two whitelist and still in lock period
      */
     function checkLock(address source) external view returns (bool) {
-        LockDuration memory lock = lockRecords[source];
-        if (whitelist[source] && block.number >= lock.start && block.number <= lock.end)
+        LockDuration memory lockDuration = lockRecords[source];
+        if (whitelist[source] && block.number >= lockDuration.start && block.number <= lockDuration.end)
             return true;
         return false;
     }
