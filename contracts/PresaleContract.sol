@@ -11,88 +11,112 @@ import {Ownable} from "./utils/Ownable.sol";
 import {IERC20} from "./extensions/IERC20.sol";
 
 
+struct PresaleSetting {
+    string name;
+    uint256 minPurchase;
+    uint256 start;
+    uint256 end;
+    uint256 lockDuration;
+    uint256 totalSupply;
+    uint256 PRICE;
+    uint256 vestingMonth;
+}
+
+interface ILocker {
+  /**
+   * @dev Fails if transaction is not allowed. Otherwise returns the penalty.
+   * Returns a bool and a uint16, bool clarifying the penalty applied, and uint16 the penaltyOver1000
+   */
+  function lock(address source, uint256 start, uint256 end) external returns (bool);
+}
+
 contract Presale is Ownable {
 
-    uint256 private SEEDING_RATE;
-    uint256 private PRIVATE_SALE_RATE;
+    uint256 public totalTokenSold;
 
-    uint256 private seedingStart;
-    uint256 private seedingEnd;
+    mapping(address=>uint256) public balances;
 
-    uint256 private privateSaleStart;
-    uint256 private privateSaleEnd;
-
-    uint256 private totalTokenSold;
-
-    mapping(address=>uint256) private _seedingAllowances;
-    mapping(address=>uint256) private _privateSaleAllowances;
-
-    mapping(address=>uint256) private _balances;
-
-    address private USDT_CONTRACT = 0x55d398326f99059fF775485246999027B3197955;
-    address private BUSD_CONTRACT = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
-    address private DAI_CONTRACT = 0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3;
+    address public USDT_CONTRACT = 0x40d60E0282356D82358B0De9e5F437401a12f0ab;
+    address public BUSD_CONTRACT = 0x68b55C4c19Ee274a68080b156b1e10CdAF34E63E;
+    address public DAI_CONTRACT = 0xc85279aC8a24Ed7D3Fb7d4dC188AFf0c21010F0A;
+    address public CORI_CONTRACT = 0xb826fBD3BD6ed888eEcAFF6B4dcD42bd6b930971;
 
     enum TokenType {USDT, BUSD, DAI}
-    enum Round {SEEDING, PRIVATE}
 
-    IERC20 public token;
+    IERC20 public stableCoin;
+    IERC20 public CORI_TOKEN;
 
-    modifier onlyInSeedingRound() {
-        require(seedingStart >= block.number && seedingEnd <= block.number, "Seeding round is not started or it has ended");
-        _;
+
+    PresaleSetting public SEEDING_SETTING;
+    PresaleSetting public FIRST_ROUND_SETTING;
+    PresaleSetting public SECOND_ROUND_SETTING;
+    PresaleSetting public THRID_ROUND_SETTING;
+
+    PresaleSetting public currentSetting;
+
+    constructor() {
+        SEEDING_SETTING = PresaleSetting("Seeding", 100*10**18, 9119140, 10119140, 0, 200000000*10**18, 1000, 15);
+        FIRST_ROUND_SETTING = PresaleSetting("Private Sale Round 1", 200*10**18, 0, 0, 0, 200000000*10**18, 666, 12);
+        SECOND_ROUND_SETTING = PresaleSetting("Private Sale Round 2", 300*10**18, 0, 0, 0, 100000000*10**18, 666, 12);
+        THRID_ROUND_SETTING = PresaleSetting("Private Sale Round 3", 400*10**18, 0, 0, 0, 100000000*10**18, 666, 12);
+
+        CORI_TOKEN = IERC20(CORI_CONTRACT);
     }
 
-    modifier onlyInPrivateSaleRound() {
-        require(privateSaleStart >= block.number && privateSaleEnd <= block.number, "Private sale is not started or it has ended");
-        _;
+    function updatePresaleSetting() public {
+        if (block.number >= SEEDING_SETTING.start && block.number <= SEEDING_SETTING.end)
+            currentSetting = SEEDING_SETTING;
+
+        else if (block.number >= FIRST_ROUND_SETTING.start && block.number <= FIRST_ROUND_SETTING.end)
+            currentSetting = FIRST_ROUND_SETTING;
+
+        else if (block.number >= SECOND_ROUND_SETTING.start && block.number <= SECOND_ROUND_SETTING.end)
+            currentSetting = SECOND_ROUND_SETTING;
+
+        else if (block.number >= THRID_ROUND_SETTING.start && block.number <= THRID_ROUND_SETTING.end)
+            currentSetting = THRID_ROUND_SETTING;
     }
 
-    constructor(uint256 seedingRate_, uint256 privateSaleRate_) {
-        SEEDING_RATE = seedingRate_;
-        PRIVATE_SALE_RATE = privateSaleRate_;
+    function deposit(address spender, uint256 amount, address tokenAddr) internal {
+        stableCoin = IERC20(tokenAddr);
+        stableCoin.transferFrom(spender, address(this), amount);
+        uint256 sellAmount = amount * currentSetting.PRICE;
+        balances[_msgSender()] += sellAmount;
+        totalTokenSold += sellAmount;
     }
 
-    function addWhitelistForSeedingRound(address[] memory whilelists_, uint256[] memory maxPurchases_, Round roundType) public onlyOwner {
-        if (roundType == Round.SEEDING) {
-            for (uint i = 0; i < whilelists_.length; i++) {
-            _seedingAllowances[whilelists_[i]] = maxPurchases_[i];
-            }
-        }
-        else if (roundType == Round.PRIVATE) {
-            for (uint i = 0; i < whilelists_.length; i++) {
-            _privateSaleAllowances[whilelists_[i]] = maxPurchases_[i];
-            }
-        }
-        else {
-            revert("Invalid round type");
-        }
-    }
-
-    function deposit(uint256 amount, mapping(address=>uint256) storage allowances, uint256 RATE, TokenType tokenType) internal {
-        if (tokenType == TokenType.USDT)
-            token = IERC20(USDT_CONTRACT);
-
-        else if (tokenType == TokenType.BUSD) 
-            token = IERC20(BUSD_CONTRACT);
-
-        else if (tokenType == TokenType.DAI)
-            token = IERC20(DAI_CONTRACT);
-
-        token.transferFrom(address(this), address(this), amount);
-        allowances[_msgSender()] -= amount;
-        uint256 totalSold = amount * RATE;
-        _balances[_msgSender()] += totalSold;
-        totalTokenSold += totalSold;
-    }
-
-    function userDeposit(uint256 amount, TokenType tokenType, Round roundType) public {
+    function buyToken(uint256 amount, TokenType tokenType) public {
         require(amount > 0, "Invest amount must larger than zero");
-        require(_seedingAllowances[_msgSender()] >= amount, "Invalid address or the invest amount is higher than allowed");
+        require(tokenType == TokenType.USDT || tokenType == TokenType.BUSD || tokenType == TokenType.DAI, "Invalid token type");
+        // require(_seedingAllowances[_msgSender()] >= amount, "Invalid address or the invest amount is higher than allowed");
+        address tokenAddr;
+        if (tokenType == TokenType.USDT)
+            tokenAddr = USDT_CONTRACT;
 
-        if (roundType == Round.SEEDING)
-            deposit(amount, _seedingAllowances, SEEDING_RATE, tokenType);
-        if (roundType == Round.PRIVATE)
-            deposit(amount, _privateSaleAllowances, PRIVATE_SALE_RATE, tokenType);
+        if (tokenType == TokenType.BUSD)
+            tokenAddr = BUSD_CONTRACT;
+
+        if (tokenType == TokenType.DAI)
+            tokenAddr = DAI_CONTRACT;
+
+        deposit(_msgSender(), amount, tokenAddr);
+    }
+
+    function ownerWithdraw() external onlyOwner {
+        IERC20 usdt = IERC20(USDT_CONTRACT);
+        IERC20 busd = IERC20(BUSD_CONTRACT);
+        IERC20 dai = IERC20(DAI_CONTRACT);
+
+        if (usdt.balanceOf(address(this)) > 0)
+            usdt.transfer(owner(), usdt.balanceOf(address(this)));
+
+        if (busd.balanceOf(address(this)) > 0)
+            busd.transfer(owner(), busd.balanceOf(address(this)));
+
+        if (dai.balanceOf(address(this)) > 0)
+            dai.transfer(owner(), dai.balanceOf(address(this)));
+
+        if (CORI_TOKEN.balanceOf(address(this)) > 0)
+            CORI_TOKEN.transfer(owner(), CORI_TOKEN.balanceOf(address(this)));
     }
 }

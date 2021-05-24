@@ -293,7 +293,7 @@ interface ILocker {
    * @dev Fails if transaction is not allowed. Otherwise returns the penalty.
    * Returns a bool and a uint16, bool clarifying the penalty applied, and uint16 the penaltyOver1000
    */
-  function checkLock(address source) external view;
+  function checkLock(address source) external view returns (bool);
 }
 
 
@@ -321,7 +321,8 @@ contract SmartCopyRightToken is Ownable, ERC20 {
     uint256 amount
   ) internal virtual override {
     if (address(locker) != address(0)) {
-        locker.checkLock(sender);
+        if (locker.checkLock(sender))
+            revert("You can not transfer money during this time");
     }
     return ERC20._transfer(sender, recipient, amount);
   }
