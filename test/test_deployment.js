@@ -1,32 +1,37 @@
 const SmartCopyRightToken = artifacts.require("SmartCopyRightToken");
 const Locker = artifacts.require("Locker");
-const NFTToken = artifacts.require("NFTToken");
+const Presale = artifacts.require("Presale");
+const ERC20 = artifacts.require("ERC20");
 
 
 contract("SmartCopyRightToken", async accounts => {
 
-    let erc20Token;
+    let CORI;
     let locker;
-    let nftToken;
+    let usdt, busd, dai;
+    let presale;
 
     beforeEach(async () => {
-        erc20Token = await SmartCopyRightToken.deployed();
         locker = await Locker.deployed();
-        console.log(await locker.seedingRoundEnd.call());
-        nftToken = await NFTToken.deployed(); 
+        usdt = await ERC20.deployed("Tether", "USDT");
+        busd = await ERC20.deployed("Tether", "BUSD");
+        dai = await ERC20.deployed("Tether", "DAI");
+        CORI = await SmartCopyRightToken.deployed(locker.address);
+        presale = await Presale.deployed(lock.address);
+        
 
     });
 
     it("Should put 400000000 token in the first account", async() => {
-        let balance = await erc20Token.balanceOf.call(accounts[0]);
-        console.log(erc20Token.address);
+        let balance = await CORI.balanceOf.call(accounts[0]);
+        console.log(CORI.address);
         console.log(BigInt(balance));
         assert.equal(BigInt(balance), 400000000000000000000000000n);
     });
 
-    it("Should transfer success before and after inser locker", async() => {
-        console.log("locker address: ", locker.address);
-        await erc20Token.setLocker.call(locker.address);
+    it("Should transfer success before and after insert locker", async() => {
+        
+        await presale.update();
 
         await erc20Token.transfer(accounts[2], 1000000000000000000n);
 
