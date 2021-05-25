@@ -46,10 +46,10 @@ contract Presale is Ownable {
     mapping(address => uint256) public totalSold;
     mapping(address => bool) public whitelist;
 
-    address public USDT_CONTRACT = 0x40d60E0282356D82358B0De9e5F437401a12f0ab;
-    address public BUSD_CONTRACT = 0x68b55C4c19Ee274a68080b156b1e10CdAF34E63E;
-    address public DAI_CONTRACT = 0xc85279aC8a24Ed7D3Fb7d4dC188AFf0c21010F0A;
-    address public CORI_CONTRACT = 0xb826fBD3BD6ed888eEcAFF6B4dcD42bd6b930971;
+    address public USDT_CONTRACT = 0xbBF25ffd774162a94f9A1fc01068fA3479BB75f1;
+    address public BUSD_CONTRACT = 0xBAfFbecEB5406CBDf06a271F83c07ecaF7328a3A;
+    address public DAI_CONTRACT = 0xAb2fD4Cd12F6b2Db67b67cAf942FA369852A5f4C;
+    address public CORI_CONTRACT = 0xd28572DB8932988f357a1e60544E839Ba6760BB6;
 
     enum TokenType {USDT, BUSD, DAI}
 
