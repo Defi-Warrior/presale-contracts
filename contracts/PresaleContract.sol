@@ -56,7 +56,7 @@ contract Presale is Ownable {
     IERC20 public CORI_TOKEN;
 
     ISetting public SEEDING_SETTING;
-    ISetting public FIRST_ROUND_SETTING;
+    ISetting public PRIVATE_SALE_SETTING;
     // ISetting public SECOND_ROUND_SETTING;
     // ISetting public THRID_ROUND_SETTING;
     ISetting public PUBLIC_SALE_SETTING;
@@ -67,7 +67,7 @@ contract Presale is Ownable {
 
     constructor(address lockerAddr, address seedingSetting, address roundOneSetting, address publicSaleSetting) {
         SEEDING_SETTING = ISetting(seedingSetting);
-        FIRST_ROUND_SETTING = ISetting(roundOneSetting);
+        PRIVATE_SALE_SETTING = ISetting(roundOneSetting);
         PUBLIC_SALE_SETTING = ISetting(publicSaleSetting);
         // SECOND_ROUND_SETTING = ISetting();
         // THRID_ROUND_SETTING = ISetting();
@@ -89,8 +89,8 @@ contract Presale is Ownable {
         if (block.number >= SEEDING_SETTING.start() && block.number <= SEEDING_SETTING.end()) {
             currentSetting = SEEDING_SETTING;
         }
-        else if (block.number >= FIRST_ROUND_SETTING.start() && block.number <= FIRST_ROUND_SETTING.end()) {
-            currentSetting = FIRST_ROUND_SETTING;
+        else if (block.number >= PRIVATE_SALE_SETTING.start() && block.number <= PRIVATE_SALE_SETTING.end()) {
+            currentSetting = PRIVATE_SALE_SETTING;
         }
         else if (block.number >= PUBLIC_SALE_SETTING.start() && block.number <= PUBLIC_SALE_SETTING.end()) {
             currentSetting = PUBLIC_SALE_SETTING;
