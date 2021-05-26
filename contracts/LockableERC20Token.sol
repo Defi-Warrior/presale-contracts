@@ -10,6 +10,7 @@ import "./utils/Context.sol";
 import "./utils/Ownable.sol";
 import "./extensions/IERC20.sol";
 import "./utils/SafeMath.sol";
+import "./extensions/ILocker.sol";
 
 
 contract ERC20 is Context, IERC20 {
@@ -288,15 +289,6 @@ contract ERC20 is Context, IERC20 {
 }
 
 
-interface ILocker {
-  /**
-   * @dev Fails if transaction is not allowed. Otherwise returns the penalty.
-   * Returns a bool and a uint16, bool clarifying the penalty applied, and uint16 the penaltyOver1000
-   */
-  function checkLock(address source) external view returns (bool);
-}
-
-
 contract SmartCopyRightToken is Ownable, ERC20 {
   using SafeMath for uint256;
   // metadata
@@ -321,7 +313,7 @@ contract SmartCopyRightToken is Ownable, ERC20 {
     uint256 amount
   ) internal virtual override {
     if (address(locker) != address(0)) {
-        if (locker.checkLock(sender))
+        if (locker.checkLock(sender, balanceOf(sender) - amount))
             revert("You can not transfer money during this time");
     }
     return ERC20._transfer(sender, recipient, amount);
