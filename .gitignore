@@ -8,3 +8,4 @@ artifacts
 truffle/
 build/
 bin/
+node_modules/
