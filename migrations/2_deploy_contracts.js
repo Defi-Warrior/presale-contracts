@@ -1,9 +1,15 @@
-var ERC20 = artifacts.require("SmartCopyRightToken");
+var SmartCopyrightToken = artifacts.require("SmartCopyRightToken");
 var Locker = artifacts.require("Locker");
-var NFTToken = artifacts.require("NFTToken");
+var Setting = artifacts.require("PresaleSetting");
+var Presale = artifacts.require("Presale");
+
 
 module.exports = function(deployer) {
-  deployer.deploy(ERC20);
-  deployer.deploy(Locker, 10000, 10000);
-  deployer.deploy(NFTToken);
+  // deployer.deploy(SmartCopyrightToken);
+  // deployer.deploy(Locker);
+  // deployer.deploy(Setting, "Seeding", 1000000000000000000n, 0, 1000, 1, 200000000000000000000000n, 100, 12);
+  // deployer.deploy(Presale, "0xbBF25ffd774162a94f9A1fc01068fA3479BB75f1", 
+  //   "0xbBF25ffd774162a94f9A1fc01068fA3479BB75f1", 
+  //   "0xbBF25ffd774162a94f9A1fc01068fA3479BB75f1", 
+  //   "0xbBF25ffd774162a94f9A1fc01068fA3479BB75f1");
 };
