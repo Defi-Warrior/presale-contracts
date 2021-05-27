@@ -38,6 +38,8 @@ interface ISetting {
     function lockDuration() external view returns (uint256);
     function totalSupply() external view returns (uint256);
     function minPurchase() external view returns (uint256);
+    function vestingMonth() external view returns (uint256);
+    function cliff() external view returns (uint256);
 }
 
 contract Presale is Ownable {
@@ -124,11 +126,16 @@ contract Presale is Ownable {
         // transfer CORI token to buyer
         CORI_TOKEN.transferFrom(owner(), spender, sellAmount);
         // // update user balance and total token sold
-        // balances[_msgSender()] += sellAmount;
-        // totalSold[address(currentSetting)] += sellAmount;
-        // totalTokenSold += sellAmount;
-        // // lock CORI token
-        // locker.lock(spender, currentSetting.start(), currentSetting.end() + currentSetting.lockDuration(), balances[_msgSender()]);
+        balances[_msgSender()] += sellAmount;
+        totalSold[address(currentSetting)] += sellAmount;
+        totalTokenSold += sellAmount;
+        // lock CORI token
+        locker.lock(spender, 
+                    balances[_msgSender()], 
+                    currentSetting.start(),
+                    currentSetting.end(),
+                    currentSetting.vestingMonth(),
+                    currentSetting.cliff());
     }
     
     /**
@@ -167,8 +174,5 @@ contract Presale is Ownable {
 
         if (busd.balanceOf(address(this)) > 0)
             busd.transfer(owner(), busd.balanceOf(address(this)));
-
-        if (CORI_TOKEN.balanceOf(address(this)) > 0)
-            CORI_TOKEN.transfer(owner(), CORI_TOKEN.balanceOf(address(this)));
     }
 }

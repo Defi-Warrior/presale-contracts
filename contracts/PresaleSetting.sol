@@ -12,47 +12,47 @@ import {Ownable} from "./utils/Ownable.sol";
 
 contract PresaleSetting is Ownable {
     string public name;
-    uint256 public minPurchase;
     uint256 public start;
     uint256 public end;
-    uint256 public lockDuration;
-    uint256 public totalSupply;
     uint256 public price;
+    uint256 public minPurchase;
+    uint256 public totalSupply;
+    uint256 public cliff;
     uint256 public vestingMonth;
 
     constructor(string memory name_, 
-                uint256 minPurchase_, 
                 uint256 start_, 
                 uint256 end_, 
-                uint256 lockDuration_, 
-                uint256 totalSupply_, 
                 uint256 price_, 
+                uint256 minPurchase_,
+                uint256 totalSupply_, 
+                uint256 cliff_, 
                 uint256 vestingMonth_) {
         name = name_;
-        minPurchase = minPurchase_;
         start = start_;
         end = end_;
-        lockDuration = lockDuration_;
-        totalSupply = totalSupply_;
         price = price_;
+        minPurchase = minPurchase_;
+        totalSupply = totalSupply_;
+        cliff = cliff_;
         vestingMonth = vestingMonth_;
     }
 
     function editSetting(string memory name_, 
-                uint256 minPurchase_, 
                 uint256 start_, 
                 uint256 end_, 
-                uint256 lockDuration_, 
-                uint256 totalSupply_, 
                 uint256 price_, 
+                uint256 minPurchase_,
+                uint256 totalSupply_, 
+                uint256 cliff_, 
                 uint256 vestingMonth_) external onlyOwner {
         name = name_;
-        minPurchase = minPurchase_;
         start = start_;
         end = end_;
-        lockDuration = lockDuration_;
-        totalSupply = totalSupply_;
         price = price_;
+        minPurchase = minPurchase_;
+        totalSupply = totalSupply_;
+        cliff = cliff_;
         vestingMonth = vestingMonth_;
     }
 
@@ -72,8 +72,8 @@ contract PresaleSetting is Ownable {
         end = newValue;
     }
 
-    function setLockDuration(uint256 newValue) external onlyOwner {
-        lockDuration = newValue;
+    function setCliff(uint256 newValue) external onlyOwner {
+        cliff = newValue;
     }
 
     function setTotalSupply(uint256 newValue) external onlyOwner {
@@ -86,5 +86,4 @@ contract PresaleSetting is Ownable {
     function setVestingMonth(uint256 newValue) external onlyOwner {
         vestingMonth = newValue;
     }
-
 }
