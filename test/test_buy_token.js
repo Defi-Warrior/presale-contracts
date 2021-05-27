@@ -21,9 +21,9 @@ contract("SmartCopyRightToken", async accounts => {
     beforeEach(async () => {
         locker = await Locker.new();
 
-        seedingSetting = await PresaleSetting.new("Seeding", 1, 0, 10000, 1, 2000000, 30, 12);
-        privateSaleSetting = await PresaleSetting.new("Private", 2, 1000, 2000, 1, 3000000, 15, 12);
-        publicSaleSetting = await PresaleSetting.new("Public", 10, 2000, 3000, 0, 4000000, 5, 0);
+        seedingSetting = await PresaleSetting.new("Seeding", 0, 10000, 100, 1, 2000000, 6, 12);
+        privateSaleSetting = await PresaleSetting.new("Private",  0, 10000, 50, 1, 3000000, 1, 6);
+        publicSaleSetting = await PresaleSetting.new("Public",  0, 10000, 10, 1, 4000000, 0, 0);
 
         usdt = await StableCoin.new("Tether", "USDT");
         busd = await StableCoin.new("Binance USD", "BUSD");
@@ -38,7 +38,10 @@ contract("SmartCopyRightToken", async accounts => {
 
         await presale.addWhitelist([accounts[1], accounts[2], accounts[3]]);
 
-        cori.approve(presale.address, BigInt(await cori.totalSupply()));
+        await cori.approve(presale.address, BigInt(await cori.totalSupply()));
+        await cori.setLocker(locker.address);
+
+        await locker.setPresaleAddress(presale.address);
 
         let block = await web3.eth.getBlock("latest");
 
@@ -97,29 +100,190 @@ contract("SmartCopyRightToken", async accounts => {
         assert.equal((await cori.balanceOf(accounts[1])).toNumber(), 1000 * await seedingSetting.price());
 
     });
+    it("Transfer cori success", async() => {
+        await usdt.transfer(accounts[1], 1000);
+        await usdt.approve(presale.address, 1000, {from: accounts[1]});
 
-    // it("Buy token exceed amount of presale", async() => {
-        
-    // });
+        await usdt.transfer(accounts[2], 1000);
+        await usdt.approve(presale.address, 1000, {from: accounts[2]});
 
-    // it("transfer CORI fail because its locked", async() => {
-        
-    // });
+        await presale.buyToken(1000, USDT, {from: accounts[1]});
+        await presale.buyToken(1000, USDT, {from: accounts[2]});
 
-    // it("transfer CORI success even its locked", async() => {
-        
-    // });
+        await cori.transfer(accounts[1], 100);
+        await cori.transfer(accounts[2], 100, {from: accounts[1]});
 
-    // it("move to next round and buy success", async() => {
-        
-    // });
+        await locker.checkLock(accounts[2], (await cori.balanceOf(accounts[1])).toNumber());
+    });
 
-    // it("Owner withdraw success", async() => {
-        
-    // });
+    it("Transfer cori failed", async() => {
+        await usdt.transfer(accounts[1], 1000);
+        await usdt.approve(presale.address, 1000, {from: accounts[1]});
 
-    // it("Owner withdraw failed", async() => {
+        await usdt.transfer(accounts[2], 1000);
+        await usdt.approve(presale.address, 1000, {from: accounts[2]});
+
+        await presale.buyToken(1000, USDT, {from: accounts[1]});
+        await presale.buyToken(1000, USDT, {from: accounts[2]});
+
+        await expectThrow(cori.transfer(accounts[2], 100, {from: accounts[1]}));
+    });
+
+    it("Switch to private phase success", async() => {
+        await usdt.transfer(accounts[1], 2000);
+        await usdt.approve(presale.address, 2000, {from: accounts[1]});
+
+        await usdt.transfer(accounts[2], 2000);
+        await usdt.approve(presale.address, 2000, {from: accounts[2]});
+
+        await presale.buyToken(1000, USDT, {from: accounts[1]});
+        await presale.buyToken(1000, USDT, {from: accounts[2]});
+
+        await seedingSetting.setEnd(0);
+        await privateSaleSetting.setEnd(10000);
+        await privateSaleSetting.setStart(1000);
+        await presale.updatePresaleStatus();
+
+        await presale.buyToken(1000, USDT, {from: accounts[1]});
+        await presale.buyToken(1000, USDT, {from: accounts[2]});
+
+        assert.equal((await cori.balanceOf(accounts[1])).toNumber(), 1000 * await seedingSetting.price() + 1000 * await privateSaleSetting.price())
+    });
+
+    it("Test transfer cori fail after switch to private sale", async() => {
+        await usdt.transfer(accounts[1], 2000);
+        await usdt.approve(presale.address, 2000, {from: accounts[1]});
+
+        await presale.buyToken(100, USDT, {from: accounts[1]});
+
+        await seedingSetting.setEnd(0);
+        await privateSaleSetting.setEnd(10000);
+        await privateSaleSetting.setStart(1000);
+        await presale.updatePresaleStatus();
+
+        await presale.buyToken(1000, USDT, {from: accounts[1]});
         
-    // });
+        await expectThrow(
+            cori.transfer(accounts[2], 100, {from: accounts[1]})
+        );
+    });
+
+    it("Test transfer cori success after switch to public sale", async() => {
+        await usdt.transfer(accounts[1], 2000);
+        await usdt.approve(presale.address, 2000, {from: accounts[1]});
+
+        await presale.buyToken(100, USDT, {from: accounts[1]});
+
+        await seedingSetting.setStart(0);
+        await seedingSetting.setEnd(0);
+
+        await privateSaleSetting.setStart(1000);
+        await privateSaleSetting.setEnd(10000);
+
+        await presale.updatePresaleStatus();
+
+        await presale.buyToken(100, USDT, {from: accounts[1]});
+
+        await privateSaleSetting.setStart(0);
+        await privateSaleSetting.setEnd(0);
+
+        await publicSaleSetting.setStart(1000);
+
+        block = await web3.eth.getBlock("latest");
+
+        console.log("public sale start in: ", block.number);
+
+        await publicSaleSetting.setEnd(block.number + 4);
+
+        console.log("public sale end at block: ", await publicSaleSetting.end());
+
+        await presale.updatePresaleStatus();
+
+        await presale.buyToken(100, USDT, {from: accounts[1]});
+
+        block = await web3.eth.getBlock("latest");
+
+        console.log("current block number is: ", block.number);
+
+        assert.equal((await cori.balanceOf(accounts[1])).toNumber(), 
+            100 * await seedingSetting.price() + 100 * await privateSaleSetting.price() + 100 * await  publicSaleSetting.price());
+
+        // dummy transaction
+        await usdt.transfer(accounts[1], 2000);
+
+        await cori.transfer(accounts[2], 100, {from: accounts[1]});
+
+    });
+
+
+    it("Buy token exceed amount of presale", async() => {
+        
+    });
+
+    it("transfer CORI fail because its locked", async() => {
+        
+    });
+
+    it("transfer CORI success even its locked", async() => {
+        
+    });
+
+    it("move to next round and buy success", async() => {
+        
+    });
+
+    it("Owner withdraw success", async() => {
+        await usdt.transfer(accounts[1], 2000);
+        await usdt.approve(presale.address, 2000, {from: accounts[1]});
+
+        await busd.transfer(accounts[2], 2000);
+        await busd.approve(presale.address, 2000, {from: accounts[2]});
+
+        await presale.buyToken(100, USDT, {from: accounts[1]});
+        await presale.buyToken(200, BUSD, {from: accounts[2]});
+
+        await seedingSetting.setStart(0);
+        await seedingSetting.setEnd(0);
+
+        await publicSaleSetting.setStart(1000);
+        await publicSaleSetting.setEnd(10000);
+
+        await presale.updatePresaleStatus();
+
+        await presale.buyToken(300, USDT, {from: accounts[1]});
+        await presale.buyToken(400, BUSD, {from: accounts[2]});
+
+        await publicSaleSetting.setEnd(0);
+
+        await presale.ownerWithdraw();
+        let usdtBalance = BigInt(await usdt.balanceOf(accounts[0]));
+        let busdBalance = BigInt(await busd.balanceOf(accounts[0]));
+        console.log("usdt balance: ", usdtBalance);
+        console.log("busd balance: ", busdBalance);
+    });
+
+    it("Owner withdraw failed", async() => {
+        await usdt.transfer(accounts[1], 2000);
+        await usdt.approve(presale.address, 2000, {from: accounts[1]});
+
+        await busd.transfer(accounts[2], 2000);
+        await busd.approve(presale.address, 2000, {from: accounts[2]});
+
+        await presale.buyToken(100, USDT, {from: accounts[1]});
+        await presale.buyToken(200, BUSD, {from: accounts[2]});
+
+        await seedingSetting.setStart(0);
+        await seedingSetting.setEnd(0);
+
+        await publicSaleSetting.setStart(1000);
+        await publicSaleSetting.setEnd(10000);
+
+        await presale.updatePresaleStatus();
+
+        await presale.buyToken(300, USDT, {from: accounts[1]});
+        await presale.buyToken(400, BUSD, {from: accounts[2]});
+
+        await expectThrow(presale.ownerWithdraw());
+    });
 
 })
