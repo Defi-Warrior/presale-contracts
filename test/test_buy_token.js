@@ -30,9 +30,13 @@ contract("SmartCopyRightToken", async accounts => {
 
         cori = await SmartCopyRightToken.new();
 
-        presale = await Presale.new(locker.address, seedingSetting.address, privateSaleSetting.address, publicSaleSetting.address);
-        
-        await presale.updateTokenAddresses(usdt.address, busd.address, cori.address);
+        presale = await Presale.new(locker.address, 
+                                    seedingSetting.address, 
+                                    privateSaleSetting.address, 
+                                    publicSaleSetting.address,
+                                    usdt.address,
+                                    busd.address,
+                                    cori.address);
         
         await presale.updatePresaleStatus();
 
@@ -141,7 +145,7 @@ contract("SmartCopyRightToken", async accounts => {
 
         await seedingSetting.setEnd(0);
         await privateSaleSetting.setEnd(10000);
-        await privateSaleSetting.setStart(1000);
+        await privateSaleSetting.setStart(0000);
         await presale.updatePresaleStatus();
 
         await presale.buyToken(1000, USDT, {from: accounts[1]});
@@ -177,7 +181,7 @@ contract("SmartCopyRightToken", async accounts => {
         await seedingSetting.setStart(0);
         await seedingSetting.setEnd(0);
 
-        await privateSaleSetting.setStart(1000);
+        await privateSaleSetting.setStart(0);
         await privateSaleSetting.setEnd(10000);
 
         await presale.updatePresaleStatus();
@@ -187,7 +191,7 @@ contract("SmartCopyRightToken", async accounts => {
         await privateSaleSetting.setStart(0);
         await privateSaleSetting.setEnd(0);
 
-        await publicSaleSetting.setStart(1000);
+        await publicSaleSetting.setStart(0);
 
         block = await web3.eth.getBlock("latest");
 
@@ -213,23 +217,6 @@ contract("SmartCopyRightToken", async accounts => {
 
         await cori.transfer(accounts[2], 100, {from: accounts[1]});
 
-    });
-
-
-    it("Buy token exceed amount of presale", async() => {
-        
-    });
-
-    it("transfer CORI fail because its locked", async() => {
-        
-    });
-
-    it("transfer CORI success even its locked", async() => {
-        
-    });
-
-    it("move to next round and buy success", async() => {
-        
     });
 
     it("Owner withdraw success", async() => {
