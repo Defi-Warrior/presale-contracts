@@ -50,9 +50,8 @@ contract Presale is Ownable {
     mapping(address => uint256) public totalSold;
     mapping(address => bool) public whitelist;
 
-    address public USDT_CONTRACT = 0xbBF25ffd774162a94f9A1fc01068fA3479BB75f1;
-    address public BUSD_CONTRACT = 0xBAfFbecEB5406CBDf06a271F83c07ecaF7328a3A;
-    address public CORI_CONTRACT = 0xd28572DB8932988f357a1e60544E839Ba6760BB6;
+    address public USDT_ADDRESS;
+    address public BUSD_ADDRESS;
 
     enum TokenType {USDT, BUSD}
 
@@ -60,8 +59,6 @@ contract Presale is Ownable {
 
     ISetting public SEEDING_SETTING;
     ISetting public PRIVATE_SALE_SETTING;
-    // ISetting public SECOND_ROUND_SETTING;
-    // ISetting public THRID_ROUND_SETTING;
     ISetting public PUBLIC_SALE_SETTING;
 
     ISetting public currentSetting;
@@ -69,22 +66,22 @@ contract Presale is Ownable {
 
     event BuyToken(address buyer, uint256 amount);
 
-    constructor(address lockerAddr, address seedingSetting, address privateSaleSetting, address publicSaleSetting) {
+    constructor(address lockerAddr, 
+                address seedingSetting, 
+                address privateSaleSetting, 
+                address publicSaleSetting,
+                address usdtAddr,
+                address busdAddr,
+                address coriAddr) {
         SEEDING_SETTING = ISetting(seedingSetting);
         PRIVATE_SALE_SETTING = ISetting(privateSaleSetting);
         PUBLIC_SALE_SETTING = ISetting(publicSaleSetting);
-        // SECOND_ROUND_SETTING = ISetting();
-        // THRID_ROUND_SETTING = ISetting();
 
-        // CORI_TOKEN = IERC20(CORI_CONTRACT);
+        USDT_ADDRESS = usdtAddr;
+        BUSD_ADDRESS = busdAddr;
+        CORI_TOKEN = IERC20(coriAddr);
 
         locker = ILocker(lockerAddr);
-    }
-
-    function updateTokenAddresses(address usdt, address busd, address cori) external onlyOwner {
-        USDT_CONTRACT = usdt;
-        BUSD_CONTRACT = busd;
-        CORI_TOKEN = IERC20(cori);
     }
 
     function addWhitelist(address[] memory addr) external onlyOwner {
@@ -105,14 +102,6 @@ contract Presale is Ownable {
         else if (block.number >= PUBLIC_SALE_SETTING.start() && block.number <= PUBLIC_SALE_SETTING.end()) {
             currentSetting = PUBLIC_SALE_SETTING;
         }
-        // else if (block.number >= SECOND_ROUND_SETTING.start() && block.number <= SECOND_ROUND_SETTING.end()) {
-        //     currentSetting = SECOND_ROUND_SETTING;
-        //     presaleStatus = PresaleStatus.ON_GOING;
-        // }    
-        // else if (block.number >= THRID_ROUND_SETTING.start() && block.number <= THRID_ROUND_SETTING.end()) {
-        //     currentSetting = THRID_ROUND_SETTING;
-        //     presaleStatus = PresaleStatus.ON_GOING;
-        // }
     }
 
     /**
@@ -156,18 +145,18 @@ contract Presale is Ownable {
         // require(_seedingAllowances[_msgSender()] >= amount, "Invalid address or the invest amount is higher than allowed");
         address tokenAddr;
         if (tokenType == TokenType.USDT)
-            tokenAddr = USDT_CONTRACT;
+            tokenAddr = USDT_ADDRESS;
 
         if (tokenType == TokenType.BUSD)
-            tokenAddr = BUSD_CONTRACT;
+            tokenAddr = BUSD_ADDRESS;
 
         deposit(_msgSender(), amount, tokenAddr);
     }
 
     function ownerWithdraw() external onlyOwner {
         require(block.number > PUBLIC_SALE_SETTING.end(), "Presale is not ended");
-        IERC20 usdt = IERC20(USDT_CONTRACT);
-        IERC20 busd = IERC20(BUSD_CONTRACT);
+        IERC20 usdt = IERC20(USDT_ADDRESS);
+        IERC20 busd = IERC20(BUSD_ADDRESS);
 
         if (usdt.balanceOf(address(this)) > 0)
             usdt.transfer(owner(), usdt.balanceOf(address(this)));

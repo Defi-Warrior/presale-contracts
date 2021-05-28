@@ -300,7 +300,7 @@ contract SmartCopyRightToken is Ownable, ERC20 {
   // constructor
   constructor() ERC20("Smart Copyright Token", "CORI") Ownable() {
     _setupDecimals(18);
-    _mint(msg.sender, 400000000 * 10**decimals());
+    _mint(msg.sender, 4000000000 * 10**decimals());
   }
 
   function setLocker(address _locker) external onlyOwner {
