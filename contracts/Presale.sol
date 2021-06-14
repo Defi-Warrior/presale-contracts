@@ -47,7 +47,9 @@ contract Presale is Ownable {
     uint256 public totalTokenSold;
 
     mapping(address => uint256) public balances;
+    // tracking token sold by each stage using address of setting contracts.
     mapping(address => uint256) public totalSold;
+    // list of users allowed to purchase in seeding and private sale
     mapping(address => bool) public whitelist;
 
     address public USDT_ADDRESS;
@@ -55,7 +57,7 @@ contract Presale is Ownable {
 
     enum TokenType {USDT, BUSD}
 
-    IERC20 public CORI_TOKEN;
+    IERC20 public FIWA_TOKEN;
 
     ISetting public SEEDING_SETTING;
     ISetting public PRIVATE_SALE_SETTING;
@@ -79,7 +81,7 @@ contract Presale is Ownable {
 
         USDT_ADDRESS = usdtAddr;
         BUSD_ADDRESS = busdAddr;
-        CORI_TOKEN = IERC20(coriAddr);
+        FIWA_TOKEN = IERC20(coriAddr);
 
         locker = ILocker(lockerAddr);
     }
@@ -92,7 +94,7 @@ contract Presale is Ownable {
     /**
    * @dev update the current setting and status of presale
    */
-    function updatePresaleStatus() public {
+    function updatePresaleStatus() internal {
         if (block.number >= SEEDING_SETTING.start() && block.number <= SEEDING_SETTING.end()) {
             currentSetting = SEEDING_SETTING;
         }
@@ -113,7 +115,7 @@ contract Presale is Ownable {
         // transfer buyer's stable coin to this contract
         IERC20(tokenAddr).transferFrom(spender, address(this), amount);
         // transfer CORI token to buyer
-        CORI_TOKEN.transferFrom(owner(), spender, sellAmount);
+        FIWA_TOKEN.transferFrom(owner(), spender, sellAmount);
         // // update user balance and total token sold
         balances[_msgSender()] += sellAmount;
         totalSold[address(currentSetting)] += sellAmount;
@@ -131,6 +133,7 @@ contract Presale is Ownable {
    * @dev user will call this function to buy our token by their stable coins
    */
     function buyToken(uint256 amount, TokenType tokenType) public {
+        updatePresaleStatus();
         if (address(currentSetting) != address(PUBLIC_SALE_SETTING)) {
             require(whitelist[_msgSender()], "Not whitelisted address, you are not allowed to purchase in this time");
         }
