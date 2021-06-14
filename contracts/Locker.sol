@@ -96,9 +96,9 @@ contract Locker is Ownable, ILocker {
     }
 
      /**
-     * @dev check the value of {source} address, revert transaction if this address is in one of the two whitelist and still in lock period
+     * @dev check the validity of {newBalance} of {source} address, {newBalance} must smaller than lockedAmount of {source}
      */
-    function checkLock(address source, uint256 remainBalance) external view override returns (bool) {
+    function checkLock(address source, uint256 newBalance) external view override returns (bool) {
         if (!whitelist[source])
             return false;
 
@@ -106,7 +106,7 @@ contract Locker is Ownable, ILocker {
         if (lockAmount == 0)
             return false;
 
-        if (remainBalance < lockAmount)
+        if (newBalance < lockAmount)
             return true;
         return false;
     }
