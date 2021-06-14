@@ -298,9 +298,9 @@ contract SmartCopyRightToken is Ownable, ERC20 {
   ILocker public locker;
 
   // constructor
-  constructor() ERC20("Smart Copyright Token", "CORI") Ownable() {
+  constructor() ERC20("FIWA Token", "FIWA") Ownable() {
     _setupDecimals(18);
-    _mint(msg.sender, 4000000000 * 10**decimals());
+    _mint(msg.sender, 10000000000 * 10**decimals());
   }
 
   function setLocker(address _locker) external onlyOwner {
