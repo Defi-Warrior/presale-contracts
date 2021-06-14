@@ -2,11 +2,10 @@ var SmartCopyrightToken = artifacts.require("SmartCopyRightToken");
 var Locker = artifacts.require("Locker");
 var Setting = artifacts.require("PresaleSetting");
 var Presale = artifacts.require("Presale");
-var StableCoin = artifacts.require("StableCoin");
 
 
-var locker, seedingSetting, privateSetting, publicSetting, cori, usdt, busd, presale; 
-// testnet addresses
+// var locker, seedingSetting, privateSetting, publicSetting, cori, presale; 
+// // testnet addresses
 const usdt_address = "0x5Fe101be7958Def91392650770765Eeb7EC04EDC";
 const busd_address = "0xD84e643EcA06E942044211B50386bbb796E92C8C";
 
@@ -39,8 +38,6 @@ module.exports = async function(deployer) {
                         cori.address);
 
   presale = await Presale.deployed();
-
-  await presale.updatePresaleStatus();
 
   await presale.addWhitelist(["0x60E0F7cDAb17b9B8421c12292Ce8CaC892f5ebee", 
                               "0x0da95fF7edd5A9A52b790bfA9FD2B638fA3F8eBd", 
