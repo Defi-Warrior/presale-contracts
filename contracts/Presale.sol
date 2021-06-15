@@ -120,13 +120,14 @@ contract Presale is Ownable {
         balances[_msgSender()] += sellAmount;
         totalSold[address(currentSetting)] += sellAmount;
         totalTokenSold += sellAmount;
-        // lock CORI token
-        locker.lock(spender, 
-                    balances[_msgSender()], 
-                    currentSetting.start(),
-                    currentSetting.end(),
-                    currentSetting.vestingMonth(),
-                    currentSetting.cliff());
+        if (address(currentSetting) != address(PUBLIC_SALE_SETTING))
+            // lock CORI token
+            locker.lock(spender, 
+                        balances[_msgSender()], 
+                        currentSetting.start(),
+                        currentSetting.end(),
+                        currentSetting.vestingMonth(),
+                        currentSetting.cliff());
     }
     
     /**

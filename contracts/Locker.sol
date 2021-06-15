@@ -84,13 +84,17 @@ contract Locker is Ownable, ILocker {
      */
     function getRealLockedAmount(address source) public view returns (uint256) {
         LockDuration memory lockDuration = lockRecords[source];
-        if (block.number >= lockDuration.end || block.number < lockDuration.start)
+        if (block.number >= lockDuration.end)
             return 0;
             
         uint256 monthPassSinceLock = 0;
         if (block.number > lockDuration.cliff)
             monthPassSinceLock = (block.number - lockDuration.cliff) / MONTH;
-            
+
+        // avoid divide by zero
+        if (lockDuration.vestingMonth == 0)
+            return lockDuration.lockAmount;
+
         uint256 amountVestedEachMonth = lockDuration.lockAmount / lockDuration.vestingMonth;
         return lockDuration.lockAmount - (monthPassSinceLock * amountVestedEachMonth);
     }
