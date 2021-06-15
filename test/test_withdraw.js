@@ -55,40 +55,54 @@ contract("SmartCopyRightToken", async accounts => {
         console.log("Block number: ", block.number);
     });
 
-    it("Should lock token in 18 months", async() => {
-        await busd.transfer(accounts[1], 1000);
-        await busd.approve(presale.address, 1000, {from: accounts[1]});
+    it("Owner withdraw success", async() => {
+        await usdt.transfer(accounts[1], 2000);
+        await usdt.approve(presale.address, 2000, {from: accounts[1]});
 
-        await presale.buyToken(1000, BUSD, {from: accounts[1]});
+        await busd.transfer(accounts[2], 2000);
+        await busd.approve(presale.address, 2000, {from: accounts[2]});
 
-        let balance = await presaleToken.balanceOf(accounts[1]);
-        console.log("balance: ", balance.toNumber());
+        await presale.buyToken(1000, USDT, {from: accounts[1]});
+        await presale.buyToken(1000, BUSD, {from: accounts[2]});
 
-        let amount = await locker.getRealLockedAmount(accounts[1]);
-        console.log("locked amount: ", amount.toNumber());
+        await seedingSetting.setStart(0);
+        await seedingSetting.setEnd(0);
 
-        await expectThrow(
-            presaleToken.transfer(accounts[2], 10, {from: accounts[1]})
-        );
+        await publicSaleSetting.setStart(1000);
+        await publicSaleSetting.setEnd(10000);
+
+        await presale.buyToken(1000, USDT, {from: accounts[1]});
+        await presale.buyToken(1000, BUSD, {from: accounts[2]});
+
+        await publicSaleSetting.setEnd(0);
+
+        await presale.ownerWithdraw();
+        let usdtBalance = BigInt(await usdt.balanceOf(accounts[0]));
+        let busdBalance = BigInt(await busd.balanceOf(accounts[0]));
+        console.log("usdt balance: ", usdtBalance);
+        console.log("busd balance: ", busdBalance);
     });
 
-    it("Should lock token in 18 months", async() => {
-        await busd.transfer(accounts[1], 1000);
-        await busd.approve(presale.address, 1000, {from: accounts[1]});
+    it("Owner withdraw failed", async() => {
+        await usdt.transfer(accounts[1], 2000);
+        await usdt.approve(presale.address, 2000, {from: accounts[1]});
 
-        let block = await web3.eth.getBlock("latest");
-        await seedingSetting.setEnd(block.number + 3);
-        
-        await presale.buyToken(100, BUSD, {from: accounts[1]});
+        await busd.transfer(accounts[2], 2000);
+        await busd.approve(presale.address, 2000, {from: accounts[2]});
 
-        for (var i = 0;i < 20; i++) {
-            await busd.transfer(accounts[1], 1000);
-            let l = await locker.getRealLockedAmount(accounts[1]);
-            console.log("locked: ", l.toNumber());
-        }
-        // let l = await locker.lockRecords(accounts[1]);
-        // console.log("lll: ", l);
-        await presaleToken.transfer(accounts[2], 10, {from: accounts[1]});
+        await presale.buyToken(100, USDT, {from: accounts[1]});
+        await presale.buyToken(200, BUSD, {from: accounts[2]});
+
+        await seedingSetting.setStart(0);
+        await seedingSetting.setEnd(0);
+
+        await publicSaleSetting.setStart(1000);
+        await publicSaleSetting.setEnd(10000);
+
+        await presale.buyToken(300, USDT, {from: accounts[1]});
+        await presale.buyToken(400, BUSD, {from: accounts[2]});
+
+        await expectThrow(presale.ownerWithdraw());
     });
 
 })

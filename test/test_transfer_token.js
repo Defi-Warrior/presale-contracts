@@ -69,7 +69,7 @@ contract("SmartCopyRightToken", async accounts => {
         await presaleToken.transfer(accounts[2], 100, {from: accounts[1]});
     });
 
-    it("Transfer presaleToken failed during any sale stage", async() => {
+    it("Transfer presaleToken failed during any sale stage except public sale", async() => {
         await usdt.transfer(accounts[1], 10000);
         await usdt.approve(presale.address, 10000, {from: accounts[1]});
 
@@ -99,12 +99,6 @@ contract("SmartCopyRightToken", async accounts => {
 
         await presale.buyToken(1000, USDT, {from: accounts[2]});
 
-        await expectThrow(presaleToken.transfer(accounts[2], 100, {from: accounts[1]}));
-
-        for (var i = 0; i < 3; i++)
-        await usdt.transfer(accounts[1], 1);
-
         await presaleToken.transfer(accounts[1], 100, {from: accounts[2]})
-        
     });
 })

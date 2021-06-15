@@ -197,12 +197,11 @@ contract("SmartCopyRightToken", async accounts => {
 
         await presale.buyToken(1000, USDT, {from: accounts[1]});
 
-        console.log((await presaleToken.balanceOf(accounts[1])).toNumber());
-
         await expectThrow(
             presale.buyToken(1, USDT, {from: accounts[1]})
         );
     });
+
     it("Buy token fail because token type is invalid", async() => {
         await usdt.transfer(accounts[1], 1000);
         await usdt.approve(presale.address, 1000, {from: accounts[1]});
@@ -213,7 +212,8 @@ contract("SmartCopyRightToken", async accounts => {
             presale.buyToken(1000, 2, {from: accounts[1]})
         );
     });
-    it("Buy token fail because buyer buy amoun is lower than minimum purchase", async() => {
+
+    it("Buy token fail because buyer buy amount is lower than minimum purchase", async() => {
         await usdt.transfer(accounts[1], 1000);
         await usdt.approve(presale.address, 1000, {from: accounts[1]});
 
@@ -221,112 +221,6 @@ contract("SmartCopyRightToken", async accounts => {
             presale.buyToken(1, USDT, {from: accounts[1]})
         );
     });
-    // it("Transfer presaleToken success because token come from account 0", async() => {
-    //     await usdt.transfer(accounts[1], 1000);
-    //     await usdt.approve(presale.address, 1000, {from: accounts[1]});
-
-    //     await usdt.transfer(accounts[2], 1000);
-    //     await usdt.approve(presale.address, 1000, {from: accounts[2]});
-
-    //     await presale.buyToken(1000, USDT, {from: accounts[1]});
-    //     await presale.buyToken(1000, USDT, {from: accounts[2]});
-
-    //     await presaleToken.transfer(accounts[1], 100);
-    //     await presaleToken.transfer(accounts[2], 100, {from: accounts[1]});
-    // });
-
-    // it("Transfer presaleToken failed during public sale", async() => {
-    //     await usdt.transfer(accounts[1], 1000);
-    //     await usdt.approve(presale.address, 1000, {from: accounts[1]});
-
-    //     await usdt.transfer(accounts[2], 1000);
-    //     await usdt.approve(presale.address, 1000, {from: accounts[2]});
-
-    //     await presale.buyToken(1000, USDT, {from: accounts[1]});
-    //     await presale.buyToken(1000, USDT, {from: accounts[2]});
-    //     presaleToken.transfer(accounts[2], 100, {from: accounts[1]});
-    //     await expectThrow(presaleToken.transfer(accounts[2], 100, {from: accounts[1]}));
-    // });
-
-    // it("Switch to private phase success", async() => {
-    //     await usdt.transfer(accounts[1], 2000);
-    //     await usdt.approve(presale.address, 2000, {from: accounts[1]});
-
-    //     await usdt.transfer(accounts[2], 2000);
-    //     await usdt.approve(presale.address, 2000, {from: accounts[2]});
-
-    //     await presale.buyToken(1000, USDT, {from: accounts[1]});
-    //     await presale.buyToken(1000, USDT, {from: accounts[2]});
-
-    //     await seedingSetting.setEnd(0);
-    //     await privateSaleSetting.setEnd(10000);
-    //     await privateSaleSetting.setStart(0000);
-
-    //     await presale.buyToken(1000, USDT, {from: accounts[1]});
-    //     await presale.buyToken(1000, USDT, {from: accounts[2]});
-
-    //     assert.equal((await presaleToken.balanceOf(accounts[1])).toNumber(), 1000 * await seedingSetting.price() + 1000 * await privateSaleSetting.price())
-    // });
-
-    // it("Test transfer presaleToken fail after switch to private sale", async() => {
-    //     await usdt.transfer(accounts[1], 2000);
-    //     await usdt.approve(presale.address, 2000, {from: accounts[1]});
-
-    //     await presale.buyToken(100, USDT, {from: accounts[1]});
-
-    //     await seedingSetting.setEnd(0);
-    //     await privateSaleSetting.setEnd(10000);
-    //     await privateSaleSetting.setStart(1000);
-
-    //     await presale.buyToken(1000, USDT, {from: accounts[1]});
-        
-    //     await expectThrow(
-    //         presaleToken.transfer(accounts[2], 100, {from: accounts[1]})
-    //     );
-    // });
-
-    // it("Test transfer presaleToken success after switch to public sale", async() => {
-    //     await usdt.transfer(accounts[1], 2000);
-    //     await usdt.approve(presale.address, 2000, {from: accounts[1]});
-
-    //     await presale.buyToken(100, USDT, {from: accounts[1]});
-
-    //     await seedingSetting.setStart(0);
-    //     await seedingSetting.setEnd(0);
-
-    //     await privateSaleSetting.setStart(0);
-    //     await privateSaleSetting.setEnd(10000);
-
-    //     await presale.buyToken(100, USDT, {from: accounts[1]});
-
-    //     await privateSaleSetting.setStart(0);
-    //     await privateSaleSetting.setEnd(0);
-
-    //     await publicSaleSetting.setStart(0);
-
-    //     block = await web3.eth.getBlock("latest");
-
-    //     console.log("public sale start in: ", block.number);
-
-    //     await publicSaleSetting.setEnd(block.number + 4);
-
-    //     console.log("public sale end at block: ", await publicSaleSetting.end());
-
-    //     await presale.buyToken(100, USDT, {from: accounts[1]});
-
-    //     block = await web3.eth.getBlock("latest");
-
-    //     console.log("current block number is: ", block.number);
-
-    //     assert.equal((await presaleToken.balanceOf(accounts[1])).toNumber(), 
-    //         100 * await seedingSetting.price() + 100 * await privateSaleSetting.price() + 100 * await  publicSaleSetting.price());
-
-    //     // dummy transaction
-    //     await usdt.transfer(accounts[1], 2000);
-
-    //     await presaleToken.transfer(accounts[2], 100, {from: accounts[1]});
-
-    // });
 
     // it("Owner withdraw success", async() => {
     //     await usdt.transfer(accounts[1], 2000);
