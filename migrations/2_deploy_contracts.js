@@ -26,7 +26,7 @@ module.exports = async function(deployer) {
   publicSetting = await Setting.deployed();
 
   await deployer.deploy(SmartCopyrightToken);
-  cori = await SmartCopyrightToken.deployed();
+  presaleToken = await SmartCopyrightToken.deployed();
 
   await deployer.deploy(Presale, 
                         locker.address, 
@@ -35,7 +35,7 @@ module.exports = async function(deployer) {
                         publicSetting.address, 
                         usdt_address, 
                         busd_address, 
-                        cori.address);
+                        presaleToken.address);
 
   presale = await Presale.deployed();
 
@@ -43,9 +43,9 @@ module.exports = async function(deployer) {
                               "0x0da95fF7edd5A9A52b790bfA9FD2B638fA3F8eBd", 
                               "0x7a42581cC461E7FC1069C72D02fe3046af3BFcA0"]);
 
-  await cori.approve(presale.address, BigInt(await cori.totalSupply()));
+  await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
 
-  await cori.setLocker(locker.address);
+  await presaleToken.setLocker(locker.address);
 
   await locker.setPresaleAddress(presale.address);
 

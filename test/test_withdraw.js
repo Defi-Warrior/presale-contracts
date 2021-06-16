@@ -65,22 +65,26 @@ contract("SmartCopyRightToken", async accounts => {
         await presale.buyToken(1000, USDT, {from: accounts[1]});
         await presale.buyToken(1000, BUSD, {from: accounts[2]});
 
-        await seedingSetting.setStart(0);
-        await seedingSetting.setEnd(0);
+        let block = await web3.eth.getBlock("latest");
 
-        await publicSaleSetting.setStart(1000);
-        await publicSaleSetting.setEnd(10000);
+        await seedingSetting.setEnd(block.number - 1);
 
-        await presale.buyToken(1000, USDT, {from: accounts[1]});
-        await presale.buyToken(1000, BUSD, {from: accounts[2]});
-
+        await publicSaleSetting.setStart(0);
         await publicSaleSetting.setEnd(0);
+
+        await privateSaleSetting.setStart(block.number - 1);
+        await privateSaleSetting.setEnd(block.number);
+
+        expectThrow(presale.ownerWithdraw(), {from: accounts[1]});
 
         await presale.ownerWithdraw();
         let usdtBalance = BigInt(await usdt.balanceOf(accounts[0]));
         let busdBalance = BigInt(await busd.balanceOf(accounts[0]));
         console.log("usdt balance: ", usdtBalance);
         console.log("busd balance: ", busdBalance);
+
+        assert.eq(usdtBalance, BigInt(await usdt.totalSupply()))
+        assert.eq(busdBalance, BigInt(await busd.totalSupply()))
     });
 
     it("Owner withdraw failed", async() => {
