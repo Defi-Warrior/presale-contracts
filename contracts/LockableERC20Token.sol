@@ -289,7 +289,7 @@ contract ERC20 is Context, IERC20 {
 }
 
 
-contract SmartCopyRightToken is Ownable, ERC20 {
+contract DefiWarriorToken is Ownable, ERC20 {
   using SafeMath for uint256;
   // metadata
   string public version = "1.0";
