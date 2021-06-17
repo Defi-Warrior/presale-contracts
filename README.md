@@ -1,11 +1,8 @@
 # Smart Copyright
 
-### Install project
-- Install solc
-- Install web3j
-
-### Compile sol to java lib
-- Compile file sol to abi and bin file
-`solc NFTToken.sol --bin --abi --optimize -o compile`
-- Compile to java lib from abi and bin file
-`web3j generate solidity -a ./compile/NFTToken.abi -b ./compile/NFTToken.bin -o java -p bap.jp`
+Presale Addr: 0x197aA5288Ca0ccb5Ac334713dB197c29aCd0885A
+FIWA Token: 0x43422EfA677FA2a9627d52aC42D9cF60A5F0c67b
+Public Sale Setting: 0x72FFb9aED92e4aDDF3F23Af3504C62152C147ab7
+Private Sale Setting: 0xbCdF4f5Ef7Ce225Cb7f0e8CAD02886Db76c279e2
+Seeding Sale Setting: 0x0eaBd952C17ddAD9B65696C41a04fe7fab14740f
+Locker: 0x8984b76CBBc7C8b68877254272553989890371B8
