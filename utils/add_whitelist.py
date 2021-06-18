@@ -15,18 +15,26 @@ with open("./presale_abi.json", "r") as f:
 
 def main(args: dict):
     addresses = pd.read_csv(args["file"])["address"].tolist()
-    web3 = Web3(Web3.HTTPProvider(PROVIDER))
-    web3.geth.personal.import_raw_key(os.environ.get("PRIVATE_KEY"))
-    print(web3.eth.accounts)
 
-    print("Is connected: ", web3.isConnected())
+    web3 = Web3(Web3.HTTPProvider(PROVIDER))
+
+    nonce = web3.eth.get_transaction_count('0xEbEC1c6317dC6fD6130DA4E9ce4FaFb84e698401')
 
     contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=ABI)
 
     for i in range(0, len(addresses), 20):
         addr = addresses[i:i+20]
-        contract.functions.addWhitelist(addr).transact()
+        tx = contract.functions.addWhitelist(addr).buildTransaction({
+            'chainId': 97,
+            'gasPrice': Web3.toWei('10', 'gwei'),
+            'nonce': nonce,
+            'from': '0xEbEC1c6317dC6fD6130DA4E9ce4FaFb84e698401'
+        })
 
+        private_key = os.environ.get("PRIVATE_KEY")
+
+        signed_tx = web3.eth.account.sign_transaction(tx, private_key=private_key)
+        web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
 
 if __name__ == '__main__':
