@@ -59,12 +59,14 @@ contract Locker is Ownable, ILocker {
      */
     function lock(address addr, uint256 amount, uint256 start, uint256 end, uint256 vestingMonth, uint256 cliff) external override onlyPresaleAddress {
         whitelist[addr] = true;
+        // locked amount
+        LockDuration memory lockDuration = lockRecords[addr];
         // convert {cliff} to block number
         cliff = end + cliff * MONTH;
         // getting the exact end time of Presale
         end = cliff + vestingMonth * MONTH;
 
-        lockRecords[addr] = LockDuration(start, end, amount, vestingMonth, cliff);
+        lockRecords[addr] = LockDuration(start, end, amount + lockDuration.lockAmount, vestingMonth, cliff);
         // emit Lock(addr, amount, start, end, cliff);
     }
      /**
