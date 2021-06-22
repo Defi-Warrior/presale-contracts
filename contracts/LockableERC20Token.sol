@@ -314,7 +314,7 @@ contract DefiWarriorToken is Ownable, ERC20 {
   ) internal virtual override {
     if (address(locker) != address(0)) {
         if (locker.checkLock(sender, balanceOf(sender) - amount))
-            revert("You can not transfer money during this time");
+            revert("You token has been locked");
     }
     return ERC20._transfer(sender, recipient, amount);
   }

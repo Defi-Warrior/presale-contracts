@@ -12,26 +12,8 @@ import {IERC20} from "./extensions/IERC20.sol";
 import {ILocker} from "./extensions/ILocker.sol";
 
 
-struct PresaleSetting {
-    string name;
-    uint256 minPurchase;
-    uint256 start;
-    uint256 end;
-    uint256 lockDuration;
-    uint256 totalSupply;
-    uint256 PRICE;
-    uint256 vestingMonth;
-}
-
-struct Balance {
-    address owner;
-    uint256 totalToken;
-    uint256 vestingPeriod;
-    uint256 availableBalance;
-    uint256 vestedBalance;
-}
-
 interface ISetting {
+    function name() external view returns (string memory);
     function start() external view returns (uint256);
     function end() external view returns (uint256);
     function price() external view returns (uint256);
@@ -45,12 +27,12 @@ interface ISetting {
 contract Presale is Ownable {
 
     uint256 public totalTokenSold;
-
-    mapping(address => uint256) public balances;
     // tracking token sold by each stage using address of setting contracts.
     mapping(address => uint256) public totalSold;
     // list of users allowed to purchase in seeding and private sale
     mapping(address => bool) public whitelist;
+
+    mapping(address => uint) public presaleIndex;
 
     address public USDT_ADDRESS;
     address public BUSD_ADDRESS;
@@ -79,8 +61,15 @@ contract Presale is Ownable {
         PRIVATE_SALE_SETTING = ISetting(privateSaleSetting);
         PUBLIC_SALE_SETTING = ISetting(publicSaleSetting);
 
+        currentSetting = SEEDING_SETTING;
+
         USDT_ADDRESS = usdtAddr;
         BUSD_ADDRESS = busdAddr;
+
+        presaleIndex[seedingSetting] = 0;
+        presaleIndex[privateSaleSetting] = 1;
+        presaleIndex[publicSaleSetting] = 2;
+
         FIWA_TOKEN = IERC20(coriAddr);
 
         locker = ILocker(lockerAddr);
@@ -116,18 +105,17 @@ contract Presale is Ownable {
         IERC20(tokenAddr).transferFrom(spender, address(this), amount);
         // transfer CORI token to buyer
         FIWA_TOKEN.transferFrom(owner(), spender, sellAmount);
-        // // update user balance and total token sold
-        balances[_msgSender()] += sellAmount;
         totalSold[address(currentSetting)] += sellAmount;
         totalTokenSold += sellAmount;
         if (address(currentSetting) != address(PUBLIC_SALE_SETTING))
             // lock CORI token
             locker.lock(spender, 
-                        balances[_msgSender()], 
+                        sellAmount, 
                         currentSetting.start(),
                         currentSetting.end(),
                         currentSetting.vestingMonth(),
-                        currentSetting.cliff());
+                        currentSetting.cliff(),
+                        presaleIndex[address(currentSetting)]);
     }
     
     /**
@@ -143,8 +131,8 @@ contract Presale is Ownable {
 
         uint256 buyAmount = amount * currentSetting.price();
 
-        require(buyAmount >= currentSetting.minPurchase(), "Invest amount must larger or equal to than mininimum purchase amount");
-        require(totalSold[address(currentSetting)] + buyAmount <= currentSetting.totalSupply(), "No more token to sell in this round");
+        require(amount >= currentSetting.minPurchase(), "Invest amount must larger or equal to than mininimum purchase amount");
+        require(totalSold[address(currentSetting)] + buyAmount <= currentSetting.totalSupply(), "The amount you are buying exceed maximum supply token at this stage");
 
         // require(_seedingAllowances[_msgSender()] >= amount, "Invalid address or the invest amount is higher than allowed");
         address tokenAddr;

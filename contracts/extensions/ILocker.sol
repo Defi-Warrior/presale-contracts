@@ -8,5 +8,5 @@ interface ILocker {
    * Returns a bool and a uint16, bool clarifying the penalty applied, and uint16 the penaltyOver1000
    */
   function checkLock(address source, uint256 remainBalance) external view returns (bool);
-  function lock(address addr, uint256 amount, uint256 start, uint256 end, uint256 vestingMonth, uint256 cliff) external;
+  function lock(address addr, uint256 amount, uint256 start, uint256 end, uint256 vestingMonth, uint256 cliff, uint index) external;
 }
