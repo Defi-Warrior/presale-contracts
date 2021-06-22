@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@daonomic/tests-common": "github:daonomic/tests-common",
-    "@truffle/hdwallet-provider": "^1.4.0"
+    "@truffle/hdwallet-provider": "^1.4.0",
+    "truffle": "^5.3.11"
   }
 }
