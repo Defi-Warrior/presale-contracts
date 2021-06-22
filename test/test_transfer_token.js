@@ -1,7 +1,7 @@
 const tests = require("@daonomic/tests-common");
 const expectThrow = tests.expectThrow;
 
-const SmartCopyRightToken = artifacts.require("SmartCopyRightToken");
+const DefiWarriorToken = artifacts.require("DefiWarriorToken");
 const Locker = artifacts.require("Locker");
 const Presale = artifacts.require("Presale");
 const StableCoin = artifacts.require("StableCoin");
@@ -10,7 +10,7 @@ const PresaleSetting = artifacts.require("PresaleSetting");
 const USDT = 0;
 const BUSD = 1;
 
-contract("SmartCopyRightToken", async accounts => {
+contract("DefiWarriorToken", async accounts => {
 
     let presaleToken;
     let locker;
@@ -30,7 +30,7 @@ contract("SmartCopyRightToken", async accounts => {
         usdt = await StableCoin.new("Tether", "USDT");
         busd = await StableCoin.new("Binance USD", "BUSD");
 
-        presaleToken = await SmartCopyRightToken.new();
+        presaleToken = await DefiWarriorToken.new();
 
         presale = await Presale.new(locker.address, 
                                     seedingSetting.address, 
