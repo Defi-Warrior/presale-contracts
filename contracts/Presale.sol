@@ -29,10 +29,12 @@ contract Presale is Ownable {
     uint256 public totalTokenSold;
     // tracking token sold by each stage using address of setting contracts.
     mapping(address => uint256) public totalSold;
-    // list of users allowed to purchase in seeding and private sale
-    mapping(address => bool) public whitelist;
 
     mapping(address => uint) public presaleIndex;
+
+    mapping(address => bool) public buyer;
+
+    uint32 public numBuyer;
 
     address public USDT_ADDRESS;
     address public BUSD_ADDRESS;
@@ -73,11 +75,6 @@ contract Presale is Ownable {
         FIWA_TOKEN = IERC20(coriAddr);
 
         locker = ILocker(lockerAddr);
-    }
-
-    function addWhitelist(address[] memory addr) external onlyOwner {
-        for(uint i = 0; i < addr.length; i++)
-            whitelist[addr[i]] = true;
     }
 
     /**
@@ -123,9 +120,6 @@ contract Presale is Ownable {
    */
     function buyToken(uint256 amount, TokenType tokenType) public {
         updatePresaleStatus();
-        if (address(currentSetting) != address(PUBLIC_SALE_SETTING)) {
-            require(whitelist[_msgSender()], "Not whitelisted address, you are not allowed to purchase in this time");
-        }
         require(block.number >= currentSetting.start() && block.number < currentSetting.end(), "Presale is not started or has ended");
         require(tokenType == TokenType.USDT || tokenType == TokenType.BUSD, "Invalid token type");
 
@@ -141,6 +135,11 @@ contract Presale is Ownable {
 
         if (tokenType == TokenType.BUSD)
             tokenAddr = BUSD_ADDRESS;
+
+        if (!buyer[_msgSender()]) {
+            buyer[_msgSender()] = true;
+            numBuyer += 1;
+        }
 
         deposit(_msgSender(), amount, tokenAddr);
     }
