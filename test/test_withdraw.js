@@ -40,9 +40,6 @@ contract("DefiWarriorToken", async accounts => {
                                     busd.address,
                                     presaleToken.address);
         
-
-        await presale.addWhitelist([accounts[1], accounts[2], accounts[3]]);
-
         await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
         await presaleToken.setLocker(locker.address);
 
@@ -62,8 +59,13 @@ contract("DefiWarriorToken", async accounts => {
         await busd.transfer(accounts[2], 2000);
         await busd.approve(presale.address, 2000, {from: accounts[2]});
 
-        await presale.buyToken(1000, USDT, {from: accounts[1]});
-        await presale.buyToken(1000, BUSD, {from: accounts[2]});
+        await presale.buyToken(2000, USDT, {from: accounts[1]});
+        await presale.buyToken(2000, BUSD, {from: accounts[2]});
+
+        let usdtBalance = BigInt(await usdt.balanceOf(accounts[0]));
+        let busdBalance = BigInt(await busd.balanceOf(accounts[0]));
+        console.log("usdt balance: ", usdtBalance);
+        console.log("busd balance: ", busdBalance);
 
         let block = await web3.eth.getBlock("latest");
 
@@ -78,8 +80,8 @@ contract("DefiWarriorToken", async accounts => {
         await expectThrow(presale.ownerWithdraw({from: accounts[1]}));
 
         await presale.ownerWithdraw();
-        let usdtBalance = BigInt(await usdt.balanceOf(accounts[0]));
-        let busdBalance = BigInt(await busd.balanceOf(accounts[0]));
+        usdtBalance = BigInt(await usdt.balanceOf(accounts[0]));
+        busdBalance = BigInt(await busd.balanceOf(accounts[0]));
         console.log("usdt balance: ", usdtBalance);
         console.log("busd balance: ", busdBalance);
     });
@@ -91,8 +93,8 @@ contract("DefiWarriorToken", async accounts => {
         await busd.transfer(accounts[2], 2000);
         await busd.approve(presale.address, 2000, {from: accounts[2]});
 
-        await presale.buyToken(100, USDT, {from: accounts[1]});
-        await presale.buyToken(200, BUSD, {from: accounts[2]});
+        await presale.buyToken(1000, USDT, {from: accounts[1]});
+        await presale.buyToken(1000, BUSD, {from: accounts[2]});
 
         await seedingSetting.setStart(0);
         await seedingSetting.setEnd(0);
@@ -100,8 +102,8 @@ contract("DefiWarriorToken", async accounts => {
         await publicSaleSetting.setStart(1000);
         await publicSaleSetting.setEnd(10000);
 
-        await presale.buyToken(300, USDT, {from: accounts[1]});
-        await presale.buyToken(400, BUSD, {from: accounts[2]});
+        await presale.buyToken(1000, USDT, {from: accounts[1]});
+        await presale.buyToken(1000, BUSD, {from: accounts[2]});
 
         await expectThrow(presale.ownerWithdraw());
     });

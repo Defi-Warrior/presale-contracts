@@ -23,9 +23,9 @@ contract("DefiWarriorToken", async accounts => {
 
         locker = await Locker.new();
 
-        seedingSetting = await PresaleSetting.new("Seeding", block.number, block.number + 1000, 100, 1000, 2000000, 6, 12);
-        privateSaleSetting = await PresaleSetting.new("Private",  0, 0, 50, 1000, 3000000, 1, 6);
-        publicSaleSetting = await PresaleSetting.new("Public",  0, 0, 10, 1000, 4000000, 0, 0);
+        seedingSetting = await PresaleSetting.new("Seeding", block.number, block.number + 1000, 100, 100, 2000000, 6, 12);
+        privateSaleSetting = await PresaleSetting.new("Private",  0, 0, 50, 100, 3000000, 1, 6);
+        publicSaleSetting = await PresaleSetting.new("Public",  0, 0, 10, 100, 4000000, 0, 0);
 
         usdt = await StableCoin.new("Tether", "USDT");
         busd = await StableCoin.new("Binance USD", "BUSD");
@@ -40,9 +40,6 @@ contract("DefiWarriorToken", async accounts => {
                                     busd.address,
                                     presaleToken.address);
         
-
-        await presale.addWhitelist([accounts[1], accounts[2], accounts[3]]);
-
         await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
         await presaleToken.setLocker(locker.address);
 
@@ -124,7 +121,7 @@ contract("DefiWarriorToken", async accounts => {
     });
 
     it("Buy token failed because sale has ended", async() => {
-        const buyAmount = 10;
+        const buyAmount = 100;
 
         await busd.transfer(accounts[1], 1000);
         await busd.approve(presale.address, 1000, {from: accounts[1]});

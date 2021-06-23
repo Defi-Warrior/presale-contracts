@@ -40,9 +40,6 @@ contract("DefiWarriorToken", async accounts => {
                                     busd.address,
                                     presaleToken.address);
         
-
-        await presale.addWhitelist([accounts[1], accounts[2], accounts[3]]);
-
         await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
         await presaleToken.setLocker(locker.address);
 

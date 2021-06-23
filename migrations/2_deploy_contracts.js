@@ -24,41 +24,37 @@ module.exports = async function(deployer) {
 //   await deployer.deploy(StableCoin, "Bianance USD", "BUSD");
 //   busd = await StableCoin.deployed();
 
-   await deployer.deploy(Locker);
-   locker = await Locker.deployed();
+    await deployer.deploy(Locker);
+    locker = await Locker.deployed();
 
-   await deployer.deploy(Setting, "Seeding", block.number + 1, block.number + 10000, 100, 1, "200000000000000000000000000", 6, 12);
-   seedingSetting = await Setting.deployed();
+    await deployer.deploy(Setting, "Seeding", block.number + 1, block.number + 10000, 100, 1, "200000000000000000000000000", 6, 12);
+    seedingSetting = await Setting.deployed();
 
-   await deployer.deploy(Setting, "Private", block.number + 10001, block.number + 20000, 50, 1, "300000000000000000000000000", 2, 12);
-   privateSetting = await Setting.deployed();
+    await deployer.deploy(Setting, "Private", block.number + 10001, block.number + 20000, 50, 1, "300000000000000000000000000", 2, 12);
+    privateSetting = await Setting.deployed();
 
-   await deployer.deploy(Setting, "Public Sale", block.number + 20001, block.number + 30000, 25, 1, "500000000000000000000000000", 0, 0);
-   publicSetting = await Setting.deployed();
+    await deployer.deploy(Setting, "Public Sale", block.number + 20001, block.number + 30000, 25, 1, "500000000000000000000000000", 0, 0);
+    publicSetting = await Setting.deployed();
 
-   await deployer.deploy(DefiWarriorToken);
-   presaleToken = await DefiWarriorToken.deployed();
+    await deployer.deploy(DefiWarriorToken);
+    presaleToken = await DefiWarriorToken.deployed();
 
 
 
-   await deployer.deploy(Presale,
-                         locker.address,
-                         seedingSetting.address,
-                         privateSetting.address,
-                         publicSetting.address,
-                         usdt_address,
-                         busd_address,
-                         presaleToken.address);
+    await deployer.deploy(Presale,
+                          locker.address,
+                          seedingSetting.address,
+                          privateSetting.address,
+                          publicSetting.address,
+                          usdt_address,
+                          busd_address,
+                          presaleToken.address);
 
-   presale = await Presale.deployed();
+    presale = await Presale.deployed();
 
-  await presale.addWhitelist(["0x60E0F7cDAb17b9B8421c12292Ce8CaC892f5ebee",
-                              "0x0da95fF7edd5A9A52b790bfA9FD2B638fA3F8eBd",
-                              "0x7a42581cC461E7FC1069C72D02fe3046af3BFcA0"]);
+    await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
 
-   await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
+    await presaleToken.setLocker(locker.address);
 
-   await presaleToken.setLocker(locker.address);
-
-   await locker.setPresaleAddress(presale.address);
+    await locker.setPresaleAddress(presale.address);
 };
