@@ -298,7 +298,7 @@ contract DefiWarriorToken is Ownable, ERC20 {
   ILocker public locker;
 
   // constructor
-  constructor() ERC20("FIWA Token", "FIWA") Ownable() {
+  constructor() ERC20("Defi Warrior Token", "FIWA") Ownable() {
     _setupDecimals(18);
     _mint(msg.sender, 10000000000 * 10**decimals());
   }
