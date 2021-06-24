@@ -125,7 +125,7 @@ contract Presale is Ownable {
 
         uint256 buyAmount = amount * currentSetting.price();
 
-        require(amount >= currentSetting.minPurchase(), "Invest amount must larger or equal to than mininimum purchase amount");
+        require(amount >= currentSetting.minPurchase(), "Invest amount must larger or equal to mininimum purchase amount");
         require(totalSold[address(currentSetting)] + buyAmount <= currentSetting.totalSupply(), "The amount you are buying exceed maximum supply token at this stage");
 
         // require(_seedingAllowances[_msgSender()] >= amount, "Invalid address or the invest amount is higher than allowed");
