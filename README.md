@@ -1,10 +1,19 @@
 # Defi Warrior
 
+- This repository is used to hold the contracts for hosting presale Defi Warrior token
+
+## Install
+
+- Install dependencies: `npm install`
+- Build: `truffle compile`
+- Test: `truffle test`
+- Deploy: `truffle deploy --network mainnet`
+
 ## Mainnet
 
 Presale Addr: 0x197aA5288Ca0ccb5Ac334713dB197c29aCd0885A
 
-FIWA Token: 0x43422EfA677FA2a9627d52aC42D9cF60A5F0c67b
+FIWA Token: 0xFf436Ab14F1cb81f6A02F95378b36DFAB11B6E9f
 
 Public Sale Setting: 0x72FFb9aED92e4aDDF3F23Af3504C62152C147ab7
 
