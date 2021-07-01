@@ -15,8 +15,8 @@ const busd_address = "0x26C84EAeC7735a3B263bde1368f586791DBB978A";
 //const busd_address = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56";
 
 module.exports = async function(deployer) {
-  let block = await web3.eth.getBlock("latest");
-  console.log("block number: ", block.number);
+    let block = await web3.eth.getBlock("latest");
+    console.log("block number: ", block.number);
 
 //   await deployer.deploy(StableCoin, "Tether", "USDT");
 //   usdt = await StableCoin.deployed();
@@ -27,7 +27,7 @@ module.exports = async function(deployer) {
     await deployer.deploy(Locker);
     locker = await Locker.deployed();
 
-    await deployer.deploy(Setting, "Seeding", block.number + 1, block.number + 10000, 100, 1, "200000000000000000000000000", 6, 12);
+    await deployer.deploy(Setting, "Seeding", block.number + 1, block.number + 10000000, 100, 1, "200000000000000000000000000", 6, 12);
     seedingSetting = await Setting.deployed();
 
     await deployer.deploy(Setting, "Private", block.number + 10001, block.number + 20000, 50, 1, "300000000000000000000000000", 2, 12);
@@ -38,8 +38,6 @@ module.exports = async function(deployer) {
 
     await deployer.deploy(DefiWarriorToken);
     presaleToken = await DefiWarriorToken.deployed();
-
-
 
     await deployer.deploy(Presale,
                           locker.address,
