@@ -32,9 +32,11 @@ contract Locker is Ownable, ILocker {
 
     // address of deployed Presale contract
     address public presaleAddress;
+
     // number of block that represent 1 month in BSC
-    uint256 public constant MONTH = 864000;
-    uint public constant PRESALE_STAGE = 4;
+    uint256 public constant MONTH = 1;
+
+    uint public constant PRESALE_STAGE = 6;
 
     modifier onlyPresaleAddress() {
         require(_msgSender() == presaleAddress, "Invalid caller, must be presale address");
@@ -51,13 +53,13 @@ contract Locker is Ownable, ILocker {
 
     /**
      * @dev lock an account from transfering CORI token in a specific block number
-     * the length of addresses and starts, ends list must equal
      * @param addr address representing account being locked
      * @param amount the amount being locked, account's balance can't go below this number during lock time
      * @param start block number represent start of lock period
      * @param end block number represent start of lock period
      * @param vestingMonth similar to {vestingMonth} in LockDuration
      * @param cliff number of months the token will be locked before able to vesting
+     * @param index there are multiple presale stages and lock configurations, so we must index them to calculate the real locked amount in each stage
      */
     function lock(address addr, uint256 amount, uint256 start, uint256 end, uint256 vestingMonth, uint256 cliff, uint index) external override onlyPresaleAddress {
         LockDuration memory locker = lockRecords[addr][index];
@@ -67,13 +69,13 @@ contract Locker is Ownable, ILocker {
         cliff = end + cliff * MONTH;
         // getting the exact end time of Presale
         end = cliff + vestingMonth * MONTH;
-
+        // update lock amount
         lockRecords[addr][index] = LockDuration(start, end, amount + locker.lockAmount, vestingMonth, cliff);
-        // emit Lock(addr, amount, start, end, cliff);
     }
     /**
-     * @dev calculate the true amount being locked of an address after a while
+     * @dev calculate the true amount being locked of an address in one presale stage
      * @param source address representing account being checked
+     * @param index index of presale stage
      * @return uint256 address representing the locked amount
      */
     function getRealLockedAmount(address source, uint index) public view returns (uint256) {
@@ -87,7 +89,7 @@ contract Locker is Ownable, ILocker {
 
         // avoid divide by zero
         if (lockDuration.vestingMonth == 0)
-            return lockDuration.lockAmount;
+            return 0;
 
         uint256 amountVestedEachMonth = lockDuration.lockAmount / lockDuration.vestingMonth;
         return lockDuration.lockAmount - (monthPassSinceLock * amountVestedEachMonth);

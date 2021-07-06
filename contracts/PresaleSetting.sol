@@ -38,24 +38,6 @@ contract PresaleSetting is Ownable {
         vestingMonth = vestingMonth_;
     }
 
-    function editSetting(string memory name_, 
-                uint256 start_, 
-                uint256 end_, 
-                uint256 price_, 
-                uint256 minPurchase_,
-                uint256 totalSupply_, 
-                uint256 cliff_, 
-                uint256 vestingMonth_) external onlyOwner {
-        name = name_;
-        start = start_;
-        end = end_;
-        price = price_;
-        minPurchase = minPurchase_;
-        totalSupply = totalSupply_;
-        cliff = cliff_;
-        vestingMonth = vestingMonth_;
-    }
-
     function setName(string memory newName) external onlyOwner {
         name = newName;
     }
