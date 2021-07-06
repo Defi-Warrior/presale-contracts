@@ -1,3 +1,9 @@
+const bigNumberify = require('ethers/utils').bigNumberify
+
+function expandTo18Decimals(n) {
+    return bigNumberify(n).mul(bigNumberify(10).pow(18))
+}
+
 var DefiWarriorToken = artifacts.require("DefiWarriorToken");
 var Locker = artifacts.require("Locker");
 var Setting = artifacts.require("PresaleSetting");
@@ -24,35 +30,47 @@ module.exports = async function(deployer) {
 //   await deployer.deploy(StableCoin, "Bianance USD", "BUSD");
 //   busd = await StableCoin.deployed();
 
-    // await deployer.deploy(Locker);
-    // locker = await Locker.deployed();
+    await deployer.deploy(Locker);
+    locker = await Locker.deployed();
 
-    // await deployer.deploy(Setting, "Seeding", block.number + 1, block.number + 10000000, 100, 1, "200000000000000000000000000", 6, 12);
-    // seedingSetting = await Setting.deployed();
+    await deployer.deploy(Setting, "Seeding", block.number + 1, block.number + 10000, 5000, expandTo18Decimals(10000), expandTo18Decimals(500000000), 1, 15);
+    seedingSetting = await Setting.deployed();
 
-    // await deployer.deploy(Setting, "Private", block.number + 10001, block.number + 20000, 50, 1, "300000000000000000000000000", 2, 12);
-    // privateSetting = await Setting.deployed();
+    await deployer.deploy(Setting, "Private Sale Phase 1", block.number + 1, block.number + 10000, 1000, expandTo18Decimals(100), expandTo18Decimals(100000000), 2, 12);
+    privateSetting_1 = await Setting.deployed();
 
-    // await deployer.deploy(Setting, "Public Sale", block.number + 20001, block.number + 30000, 25, 1, "500000000000000000000000000", 0, 0);
-    // publicSetting = await Setting.deployed();
+    await deployer.deploy(Setting, "Private Sale Phase 2", block.number + 1, block.number + 10000, 909, expandTo18Decimals(100), expandTo18Decimals(150000000), 2, 12);
+    privateSetting_2 = await Setting.deployed();
 
-    // await deployer.deploy(DefiWarriorToken);
-    // presaleToken = await DefiWarriorToken.deployed();
+    await deployer.deploy(Setting, "Private Sale Phase 3", block.number + 1, block.number + 10000, 833, expandTo18Decimals(100), expandTo18Decimals(200000000), 2, 12);
+    privateSetting_3 = await Setting.deployed();
 
-    // await deployer.deploy(Presale,
-    //                       locker.address,
-    //                       seedingSetting.address,
-    //                       privateSetting.address,
-    //                       publicSetting.address,
-    //                       usdt_address,
-    //                       busd_address,
-    //                       presaleToken.address);
+    await deployer.deploy(Setting, "Private Sale Phase 4", block.number + 1, block.number + 10000, 769, expandTo18Decimals(100), expandTo18Decimals(250000000), 2, 12);
+    privateSetting_4 = await Setting.deployed();
 
-    // presale = await Presale.deployed();
+    await deployer.deploy(Setting, "Private Sale Phase 5", block.number + 1, block.number + 10000, 714, expandTo18Decimals(100), expandTo18Decimals(300000000), 2, 12);
+    privateSetting_5 = await Setting.deployed();
 
-    // await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
+    await deployer.deploy(DefiWarriorToken);
+    presaleToken = await DefiWarriorToken.deployed();
 
-    // await presaleToken.setLocker(locker.address);
+    await deployer.deploy(Presale,
+                          locker.address,
+                          [seedingSetting.address,
+                          privateSetting_1.address,
+                          privateSetting_2.address,
+                          privateSetting_3.address,
+                          privateSetting_4.address,
+                          privateSetting_5.address],
+                          usdt_address,
+                          busd_address,
+                          presaleToken.address);
 
-    // await locker.setPresaleAddress(presale.address);
+    presale = await Presale.deployed();
+
+    await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
+
+    await presaleToken.setLocker(locker.address);
+
+    await locker.setPresaleAddress(presale.address);
 };

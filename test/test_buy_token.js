@@ -1,6 +1,5 @@
 const BigNumber = require('bignumber.js');
 const utils = require('ethers/utils')
-
 const bigNumberify= utils.bigNumberify
 
 function expandTo18Decimals(n) {
