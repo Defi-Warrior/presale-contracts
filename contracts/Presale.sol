@@ -72,8 +72,10 @@ contract Presale is Ownable {
    */
     function updatePresaleStatus() external {
         for(uint i = 0; i < settings.length; i++) {
-            if (block.number >= settings[i].start() && block.number <= settings[i].end())
+            if (block.number >= settings[i].start() && block.number <= settings[i].end()) {
                 currentSetting = settings[i];
+                return;
+            }
         }
     }
 
