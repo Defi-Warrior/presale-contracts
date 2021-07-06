@@ -33,22 +33,22 @@ module.exports = async function(deployer) {
     await deployer.deploy(Locker);
     locker = await Locker.deployed();
 
-    await deployer.deploy(Setting, "Seeding", block.number + 1, block.number + 10000, 5000, expandTo18Decimals(10000), expandTo18Decimals(500000000), 1, 15);
+    await deployer.deploy(Setting, "Seeding", block.number + 1, block.number + 86400, 5000, expandTo18Decimals(10000), expandTo18Decimals(500000000), 1, 15);
     seedingSetting = await Setting.deployed();
 
-    await deployer.deploy(Setting, "Private Sale Phase 1", block.number + 1, block.number + 10000, 1000, expandTo18Decimals(100), expandTo18Decimals(100000000), 2, 12);
+    await deployer.deploy(Setting, "Private Sale Phase 1", block.number + 1, block.number + 86400, 1000, expandTo18Decimals(100), expandTo18Decimals(100000000), 2, 12);
     privateSetting_1 = await Setting.deployed();
 
-    await deployer.deploy(Setting, "Private Sale Phase 2", block.number + 1, block.number + 10000, 909, expandTo18Decimals(100), expandTo18Decimals(150000000), 2, 12);
+    await deployer.deploy(Setting, "Private Sale Phase 2", block.number + 1, block.number + 86400, 909, expandTo18Decimals(100), expandTo18Decimals(150000000), 2, 12);
     privateSetting_2 = await Setting.deployed();
 
-    await deployer.deploy(Setting, "Private Sale Phase 3", block.number + 1, block.number + 10000, 833, expandTo18Decimals(100), expandTo18Decimals(200000000), 2, 12);
+    await deployer.deploy(Setting, "Private Sale Phase 3", block.number + 1, block.number + 86400, 833, expandTo18Decimals(100), expandTo18Decimals(200000000), 2, 12);
     privateSetting_3 = await Setting.deployed();
 
-    await deployer.deploy(Setting, "Private Sale Phase 4", block.number + 1, block.number + 10000, 769, expandTo18Decimals(100), expandTo18Decimals(250000000), 2, 12);
+    await deployer.deploy(Setting, "Private Sale Phase 4", block.number + 1, block.number + 86400, 769, expandTo18Decimals(100), expandTo18Decimals(250000000), 2, 12);
     privateSetting_4 = await Setting.deployed();
 
-    await deployer.deploy(Setting, "Private Sale Phase 5", block.number + 1, block.number + 10000, 714, expandTo18Decimals(100), expandTo18Decimals(300000000), 2, 12);
+    await deployer.deploy(Setting, "Private Sale Phase 5", block.number + 1, block.number + 86400, 714, expandTo18Decimals(100), expandTo18Decimals(300000000), 2, 12);
     privateSetting_5 = await Setting.deployed();
 
     await deployer.deploy(DefiWarriorToken);
