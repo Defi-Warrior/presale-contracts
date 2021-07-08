@@ -10,33 +10,47 @@ from web3 import Web3
 PROVIDER = os.environ.get("PROVIDER", "https://data-seed-prebsc-1-s1.binance.org:8545/")
 # mainnet provider
 # PROVIDER = "https://bsc-dataseed.binance.org/"
-PRESALE_ADDRESS = os.environ.get("PRESALE_ADDR", '0xF772e5889E1E141b9e14e16443a2A76dF7188779') #testnet
-with open("./presale_abi.json", "r") as f:
-    ABI = json.load(f)['abi']
+AIRDROP_ADDRESS = os.environ.get("AIR_DROP_ADDRESS", '0x99E6714bEE9Ad9066f63ee7F20b0ff10f17B1865') #testnet
+with open("./air_drop_abi.json", "r") as f:
+    ABI = json.load(f)
 
 
 def main(args: dict):
-    addresses = pd.read_csv(args["file"])["address"].tolist()
+    addresses = pd.read_csv(args["file"])["Wallet"].tolist()
 
     web3 = Web3(Web3.HTTPProvider(PROVIDER))
 
-    nonce = web3.eth.get_transaction_count(os.environ.get("CALLER", '0xEbEC1c6317dC6fD6130DA4E9ce4FaFb84e698401'))
+    caller = os.environ.get("CALLER", '0x6148Ce093DCbd629cFbC4203C18210567d186C66')
 
-    contract = web3.eth.contract(address=PRESALE_ADDRESS, abi=ABI)
+    nonce = web3.eth.get_transaction_count(caller)
 
-    for i in range(0, len(addresses), 20):
-        addr = addresses[i:i+20]
-        tx = contract.functions.addWhitelist(addr).buildTransaction({
-            'chainId': os.environ.get("CHAIN_ID", 97),
-            'gasPrice': Web3.toWei('10', 'gwei'),
-            'nonce': nonce,
-            'from': os.environ.get("CALLER", '0xEbEC1c6317dC6fD6130DA4E9ce4FaFb84e698401')
-        })
+    contract = web3.eth.contract(address=AIRDROP_ADDRESS, abi=ABI)
 
-        private_key = os.environ.get("PRIVATE_KEY")
+    private_key = os.environ.get("PRIVATE_KEY")
 
-        signed_tx = web3.eth.account.sign_transaction(tx, private_key=private_key)
-        web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    input_addr = []
+    for i, addr in enumerate(addresses):
+        if Web3.isAddress(addr):
+            if Web3.isChecksumAddress(addr):
+                input_addr.append(addr)
+            else:
+                addr = Web3.toChecksumAddress(addr)
+                input_addr.append(addr)
+        else:
+            print("Invalid address: ", addr)
+            continue
+        if len(input_addr) == 100 or i == len(addresses) - 1:
+            amounts = [666000000000000000000] * len(input_addr)
+            tx = contract.functions.updateBalance(input_addr, amounts).buildTransaction({
+                'chainId': os.environ.get("CHAIN_ID", 97),
+                'gasPrice': Web3.toWei('10', 'gwei'),
+                'nonce': nonce,
+                'from': caller
+            })
+            signed_tx = web3.eth.account.sign_transaction(tx, private_key=private_key)
+            web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            input_addr.clear()
+            nonce += 1
 
 
 if __name__ == '__main__':
