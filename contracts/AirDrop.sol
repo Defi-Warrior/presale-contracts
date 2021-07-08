@@ -27,7 +27,6 @@ contract AirDrop is Ownable {
 
     function claim() external {
         uint256 amount = balances[msg.sender];
-        require(amount > 0, "You are not in whitelist or already claimed your share of airdrop token");
         balances[msg.sender] = 0;
         token.transferFrom(owner(), msg.sender, amount);
     }
