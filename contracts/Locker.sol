@@ -34,7 +34,7 @@ contract Locker is Ownable, ILocker {
     address public presaleAddress;
 
     // number of block that represent 1 month in BSC
-    uint256 public constant MONTH = 846000;
+    uint256 public constant MONTH = 864000;
 
     uint public constant PRESALE_STAGE = 6;
 
