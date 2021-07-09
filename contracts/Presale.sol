@@ -79,6 +79,10 @@ contract Presale is Ownable {
         }
     }
 
+    function setUSDT(address usdt) external onlyOwner {
+        USDT_ADDRESS = usdt;
+    }
+
     /**
    * @dev
    */

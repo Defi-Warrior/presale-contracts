@@ -51,8 +51,8 @@ module.exports = async function(deployer) {
     await deployer.deploy(Setting, "Private Sale Phase 5", block.number + 1, 0, 714, expandTo18Decimals(100), expandTo18Decimals(300000000), 2, 12);
     privateSetting_5 = await Setting.deployed();
 
-    // await deployer.deploy(DefiWarriorToken);
-    // presaleToken = await DefiWarriorToken.deployed();
+    await deployer.deploy(DefiWarriorToken);
+    presaleToken = await DefiWarriorToken.deployed();
 
     await deployer.deploy(Presale,
                           locker.address,
@@ -64,13 +64,15 @@ module.exports = async function(deployer) {
                           privateSetting_5.address],
                           usdt_address,
                           busd_address,
-                          "0xFf436Ab14F1cb81f6A02F95378b36DFAB11B6E9f");
+                          presaleToken.address);
 
     presale = await Presale.deployed();
 
+    await presale.transferOwnership("0x1339c9aD4c6cA8993535Bcb7e401177e3DaC0fA2");
+
     // await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
 
-    // await presaleToken.setLocker(locker.address);
+    await presaleToken.setLocker(locker.address);
 
     await locker.setPresaleAddress(presale.address);
 };
