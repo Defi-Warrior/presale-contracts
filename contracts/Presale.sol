@@ -67,20 +67,20 @@ contract Presale is Ownable {
         locker = ILocker(lockerAddr);
     }
 
+    function isBlockInRange(ISetting setting) internal view returns (bool) {
+        return (block.number >= setting.start()) && (block.number <= setting.end());
+    }
+
     /**
    * @dev update the current setting and status of presale
    */
     function updatePresaleStatus() external {
         for(uint i = 0; i < settings.length; i++) {
-            if (block.number >= settings[i].start() && block.number <= settings[i].end()) {
+            if (isBlockInRange(settings[i])) {
                 currentSetting = settings[i];
                 return;
             }
         }
-    }
-
-    function setUSDT(address usdt) external onlyOwner {
-        USDT_ADDRESS = usdt;
     }
 
     /**
@@ -92,7 +92,7 @@ contract Presale is Ownable {
         // transfer buyer's stable coin to this contract
         IERC20(tokenAddr).transferFrom(spender, address(this), amount);
         // transfer CORI token to buyer
-        FIWA_TOKEN.transferFrom(owner(), spender, sellAmount);
+        FIWA_TOKEN.transfer(spender, sellAmount);
         totalSold[address(currentSetting)] += sellAmount;
         totalTokenSold += sellAmount;
         // lock CORI token
@@ -109,12 +109,11 @@ contract Presale is Ownable {
    * @dev user will call this function to buy our token by their stable coins
    */
     function buyToken(uint256 amount, TokenType tokenType) public {
-        require(block.number >= currentSetting.start() && block.number < currentSetting.end(), "Presale is not started or has ended");
+        require(isBlockInRange(currentSetting), "Presale is not started or has ended");
         require(tokenType == TokenType.USDT || tokenType == TokenType.BUSD, "Invalid token type");
         require(amount >= currentSetting.minPurchase(), "Invest amount must larger or equal to mininimum purchase amount");
         require(totalSold[address(currentSetting)] + amount * currentSetting.price() <= currentSetting.totalSupply(), "The amount you are buying exceed maximum supply token at this stage");
 
-        // require(_seedingAllowances[_msgSender()] >= amount, "Invalid address or the invest amount is higher than allowed");
         address tokenAddr;
         if (tokenType == TokenType.USDT)
             tokenAddr = USDT_ADDRESS;
@@ -131,14 +130,20 @@ contract Presale is Ownable {
     }
 
     function ownerWithdraw() external onlyOwner {
-        require(block.number > settings[settings.length-1].end(), "Presale is not ended");
         IERC20 usdt = IERC20(USDT_ADDRESS);
         IERC20 busd = IERC20(BUSD_ADDRESS);
 
-        if (usdt.balanceOf(address(this)) > 0)
-            usdt.transfer(owner(), usdt.balanceOf(address(this)));
+        uint256 usdtBalance = usdt.balanceOf(address(this));
+        uint256 busdBalance = busd.balanceOf(address(this));
+        uint256 fiwaBalance = FIWA_TOKEN.balanceOf(address(this));
 
-        if (busd.balanceOf(address(this)) > 0)
-            busd.transfer(owner(), busd.balanceOf(address(this)));
+        if (usdtBalance > 0)
+            usdt.transfer(owner(), usdtBalance);
+
+        if (busdBalance > 0)
+            busd.transfer(owner(), busdBalance);
+
+        if (fiwaBalance > 0) 
+            FIWA_TOKEN.transfer(owner(), fiwaBalance);
     }
 }

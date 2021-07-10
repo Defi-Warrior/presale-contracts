@@ -34,7 +34,7 @@ contract Locker is Ownable, ILocker {
     address public presaleAddress;
 
     // number of block that represent 1 month in BSC
-    uint256 public constant MONTH = 864000;
+    uint256 public constant BLOCK_PER_MONTH = 864000;
 
     uint public constant PRESALE_STAGE = 6;
 
@@ -66,11 +66,11 @@ contract Locker is Ownable, ILocker {
 
         whitelist[addr] = true;
         // convert {cliff} to block number
-        cliff = end + cliff * MONTH;
+        uint256 cliffEndTime = end + cliff * BLOCK_PER_MONTH;
         // getting the exact end time of Presale
-        end = cliff + vestingMonth * MONTH;
+        end = cliffEndTime + vestingMonth * BLOCK_PER_MONTH;
         // update lock amount
-        lockRecords[addr][index] = LockDuration(start, end, amount + locker.lockAmount, vestingMonth, cliff);
+        lockRecords[addr][index] = LockDuration(start, end, amount + locker.lockAmount, vestingMonth, cliffEndTime);
     }
     /**
      * @dev calculate the true amount being locked of an address in one presale stage
@@ -85,7 +85,7 @@ contract Locker is Ownable, ILocker {
             
         uint256 monthPassSinceLock = 0;
         if (block.number > lockDuration.cliff)
-            monthPassSinceLock = (block.number - lockDuration.cliff) / MONTH;
+            monthPassSinceLock = (block.number - lockDuration.cliff) / BLOCK_PER_MONTH;
 
         // avoid divide by zero
         if (lockDuration.vestingMonth == 0)

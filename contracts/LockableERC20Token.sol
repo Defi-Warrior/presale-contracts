@@ -300,7 +300,7 @@ contract DefiWarriorToken is Ownable, ERC20 {
   // constructor
   constructor() ERC20("Defi Warrior Token", "FIWA") Ownable() {
     _setupDecimals(18);
-    _mint(address(0x1339c9aD4c6cA8993535Bcb7e401177e3DaC0fA2), 10000000000 * 10**decimals());
+    _mint(address(msg.sender), 10000000000 * 10**decimals());
   }
 
   function setLocker(address _locker) external onlyOwner {
