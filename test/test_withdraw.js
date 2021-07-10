@@ -21,7 +21,6 @@ const USDT = 0;
 const BUSD = 1;
 
 contract("DefiWarriorToken", async accounts => {
-
     let presaleToken;
     let locker;
     let usdt, busd;
@@ -59,14 +58,14 @@ contract("DefiWarriorToken", async accounts => {
                                     busd.address,
                                     presaleToken.address);
         
-        await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
         await presaleToken.setLocker(locker.address);
 
         await locker.setPresaleAddress(presale.address);
 
+        await presaleToken.transfer(presale.address, expandTo18Decimals(1500000000));
+
         console.log("presale addr: ", presale.address);
-        console.log("Block number: ", block.number);
-    });
+    });   
 
 
     it("Owner withdraw success", async() => {
@@ -104,27 +103,4 @@ contract("DefiWarriorToken", async accounts => {
         console.log("usdt balance: ", usdtBalance);
         console.log("busd balance: ", busdBalance);
     });
-
-    // it("Owner withdraw failed", async() => {
-    //     await usdt.transfer(accounts[1], 2000);
-    //     await usdt.approve(presale.address, 2000, {from: accounts[1]});
-
-    //     await busd.transfer(accounts[2], 2000);
-    //     await busd.approve(presale.address, 2000, {from: accounts[2]});
-
-    //     await presale.buyToken(1000, USDT, {from: accounts[1]});
-    //     await presale.buyToken(1000, BUSD, {from: accounts[2]});
-
-    //     await seedingSetting.setStart(0);
-    //     await seedingSetting.setEnd(0);
-
-    //     await publicSaleSetting.setStart(1000);
-    //     await publicSaleSetting.setEnd(10000);
-
-    //     await presale.buyToken(1000, USDT, {from: accounts[1]});
-    //     await presale.buyToken(1000, BUSD, {from: accounts[2]});
-
-    //     await expectThrow(presale.ownerWithdraw());
-    // });
-
 })

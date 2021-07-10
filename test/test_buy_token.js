@@ -57,119 +57,105 @@ contract("DefiWarriorToken", async accounts => {
                                     busd.address,
                                     presaleToken.address);
         
-        await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
         await presaleToken.setLocker(locker.address);
 
         await locker.setPresaleAddress(presale.address);
+
+        await presaleToken.transfer(presale.address, expandTo18Decimals(1500000000));
 
         console.log("presale addr: ", presale.address);
         console.log("Block number: ", block.number);
     });
 
-    // it("Successfully buy token using busd or usdt", async() => {
-    //     await busd.transfer(accounts[1], transferAmount);
-    //     await busd.approve(presale.address, transferAmount, {from: accounts[1]});
-
-    //     await usdt.transfer(accounts[1], transferAmount);
-    //     await usdt.approve(presale.address, transferAmount, {from: accounts[1]});
-
-    //     await presale.buyToken(buyAmount, USDT, {from: accounts[1]});
-    //     await presale.buyToken(buyAmount, BUSD, {from: accounts[1]});
-    //     assert.equal(BigNumber(await presaleToken.balanceOf(accounts[1])).toString(), BigNumber(buyAmount * BigNumber(await seedingSetting.price()) * 2).toString());
-    // });
-
-    // it("Successfully buy token during 3 stages of sale", async() => {
-    //     await busd.transfer(accounts[1], transferAmount);
-    //     await busd.approve(presale.address, transferAmount, {from: accounts[1]});
-
-    //     await usdt.transfer(accounts[1], transferAmount);
-    //     await usdt.approve(presale.address, transferAmount, {from: accounts[1]});
-
-    //     await busd.transfer(accounts[2], transferAmount);
-    //     await busd.approve(presale.address, transferAmount, {from: accounts[2]});
-
-    //     await usdt.transfer(accounts[2], transferAmount);
-    //     await usdt.approve(presale.address, transferAmount, {from: accounts[2]});
-        
-    //     // buy in seeding stage
-    //     await presale.buyToken(buyAmount, USDT, {from: accounts[1]});
-    //     await presale.buyToken(buyAmount, BUSD, {from: accounts[1]});
-        
-    //     assert.equal((BigNumber(await presaleToken.balanceOf(accounts[1]))), buyAmount * BigNumber(await seedingSetting.price() * 2));
-
-    //     let block = await web3.eth.getBlock("latest"); 
-    //     // end seeding sale
-    //     seedingSetting.setEnd(block.number);
-    //     // move to private sale
-    //     privateSaleSetting_1.setStart(block.number);
-    //     privateSaleSetting_1.setEnd(block.number + 1000);
-
-    //     presale.updatePresaleStatus();
-
-    //     // buy in private sale
-    //     await presale.buyToken(buyAmount, USDT, {from: accounts[2]});
-    //     await presale.buyToken(buyAmount, BUSD, {from: accounts[2]});
-
-    //     await presale.buyToken(buyAmount, BUSD, {from: accounts[1]});
-        
-    //     assert.equal(BigNumber(await presaleToken.balanceOf(accounts[2])).toString(), BigNumber(buyAmount * BigNumber(await privateSaleSetting_1.price()) * 2).toString());
-    //     assert.equal(BigNumber(await presaleToken.balanceOf(accounts[1])).toString(), BigNumber(buyAmount * BigNumber(await privateSaleSetting_1.price()) + buyAmount * BigNumber(await seedingSetting.price()) * 2).toString());
-
-    //     block = await web3.eth.getBlock("latest"); 
-
-    //     privateSaleSetting_1.setEnd(block.number);
-    //     // move to public sale
-    //     privateSaleSetting_2.setStart(block.number);
-    //     privateSaleSetting_2.setEnd(block.number + 1000);
-
-    //     presale.updatePresaleStatus();
-    //     // buy from accounts[4] which is not whitelisted
-    //     await busd.transfer(accounts[4], transferAmount);
-    //     await busd.approve(presale.address, transferAmount, {from: accounts[4]});
-
-    //     await presale.buyToken(buyAmount, BUSD, {from: accounts[4]});
-
-    //     assert.equal(BigNumber(await presaleToken.balanceOf(accounts[4])).toString(), BigNumber(buyAmount * await privateSaleSetting_2.price()).toString());
-
-    // });
-
-    // it("Buy token failed because sale has ended", async() => {
-    //     await busd.transfer(accounts[1], transferAmount);
-    //     await busd.approve(presale.address, transferAmount, {from: accounts[1]});
-
-    //     await usdt.transfer(accounts[1], transferAmount);
-    //     await usdt.approve(presale.address, transferAmount, {from: accounts[1]});
-
-    //     await presale.buyToken(buyAmount, USDT, {from: accounts[1]});
-    //     await presale.buyToken(buyAmount, BUSD, {from: accounts[1]});
-        
-    //     assert.equal(BigNumber(await presaleToken.balanceOf(accounts[1])).toString(), BigNumber(buyAmount * BigNumber(await seedingSetting.price()) * 2).toString());
-
-    //     let block = await web3.eth.getBlock("latest"); 
-
-    //     seedingSetting.setEnd(block.number);
-        
-    //     presale.updatePresaleStatus();
-
-    //     await expectThrow(
-    //         presale.buyToken(buyAmount, BUSD, {from: accounts[1]})
-    //     );
-
-    // });
-    it("buy token fail because owner dont approve presale contract to spent presaleToken", async() => {
-        presaleToken.approve(presale.address, 0);
+    it("Successfully buy token using busd or usdt", async() => {
+        await busd.transfer(accounts[1], transferAmount);
+        await busd.approve(presale.address, transferAmount, {from: accounts[1]});
 
         await usdt.transfer(accounts[1], transferAmount);
         await usdt.approve(presale.address, transferAmount, {from: accounts[1]});
 
+        await presale.buyToken(buyAmount, USDT, {from: accounts[1]});
+        await presale.buyToken(buyAmount, BUSD, {from: accounts[1]});
+        assert.equal(BigNumber(await presaleToken.balanceOf(accounts[1])).toString(), BigNumber(buyAmount * BigNumber(await seedingSetting.price()) * 2).toString());
+    });
+
+    it("Successfully buy token during 3 stages of sale", async() => {
+        await busd.transfer(accounts[1], transferAmount);
+        await busd.approve(presale.address, transferAmount, {from: accounts[1]});
+
+        await usdt.transfer(accounts[1], transferAmount);
+        await usdt.approve(presale.address, transferAmount, {from: accounts[1]});
+
+        await busd.transfer(accounts[2], transferAmount);
+        await busd.approve(presale.address, transferAmount, {from: accounts[2]});
+
+        await usdt.transfer(accounts[2], transferAmount);
+        await usdt.approve(presale.address, transferAmount, {from: accounts[2]});
+        
+        // buy in seeding stage
+        await presale.buyToken(buyAmount, USDT, {from: accounts[1]});
+        await presale.buyToken(buyAmount, BUSD, {from: accounts[1]});
+        
+        assert.equal((BigNumber(await presaleToken.balanceOf(accounts[1]))), buyAmount * BigNumber(await seedingSetting.price() * 2));
+
+        let block = await web3.eth.getBlock("latest"); 
+        // end seeding sale
+        await seedingSetting.setEnd(block.number);
+        // move to private sale
+        await privateSaleSetting_1.setStart(block.number);
+        await privateSaleSetting_1.setEnd(block.number + 1000);
+
+        await presale.updatePresaleStatus();
+
+        // buy in private sale
+        await presale.buyToken(buyAmount, USDT, {from: accounts[2]});
+        await presale.buyToken(buyAmount, BUSD, {from: accounts[2]});
+
+        await presale.buyToken(buyAmount, BUSD, {from: accounts[1]});
+        
+        assert.equal(BigNumber(await presaleToken.balanceOf(accounts[2])).toString(), BigNumber(buyAmount * BigNumber(await privateSaleSetting_1.price()) * 2).toString());
+        assert.equal(BigNumber(await presaleToken.balanceOf(accounts[1])).toString(), BigNumber(buyAmount * BigNumber(await privateSaleSetting_1.price()) + buyAmount * BigNumber(await seedingSetting.price()) * 2).toString());
+
+        block = await web3.eth.getBlock("latest"); 
+
+        await privateSaleSetting_1.setEnd(block.number);
+        // move to public sale
+        await privateSaleSetting_2.setStart(block.number);
+        await privateSaleSetting_2.setEnd(block.number + 1000);
+
+        await presale.updatePresaleStatus();
+        // buy from accounts[4] which is not whitelisted
+        await busd.transfer(accounts[4], transferAmount);
+        await busd.approve(presale.address, transferAmount, {from: accounts[4]});
+
+        await presale.buyToken(buyAmount, BUSD, {from: accounts[4]});
+
+        assert.equal(BigNumber(await presaleToken.balanceOf(accounts[4])).toString(), BigNumber(buyAmount * await privateSaleSetting_2.price()).toString());
+
+    });
+
+    it("Buy token failed because sale has ended", async() => {
+        await busd.transfer(accounts[1], transferAmount);
+        await busd.approve(presale.address, transferAmount, {from: accounts[1]});
+
+        await usdt.transfer(accounts[1], transferAmount);
+        await usdt.approve(presale.address, transferAmount, {from: accounts[1]});
+
+        await presale.buyToken(buyAmount, USDT, {from: accounts[1]});
+        await presale.buyToken(buyAmount, BUSD, {from: accounts[1]});
+        
+        assert.equal(BigNumber(await presaleToken.balanceOf(accounts[1])).toString(), BigNumber(buyAmount * BigNumber(await seedingSetting.price()) * 2).toString());
+
+        let block = await web3.eth.getBlock("latest"); 
+
+        await seedingSetting.setEnd(block.number);
+        
+        await presale.updatePresaleStatus();
+
         await expectThrow(
-            presale.buyToken(transferAmount, USDT, {from: accounts[1]})
+            presale.buyToken(buyAmount, BUSD, {from: accounts[1]})
         );
 
-        presaleToken.approve(presale.address, BigNumber(await presaleToken.totalSupply()));
-        await presale.buyToken(transferAmount, USDT, {from: accounts[1]});
-        console.log("transfer amount: ", transferAmount.toString(10), "price: ", BigNumber(await seedingSetting.price()).toString(10), "result: ", (transferAmount * BigNumber(await seedingSetting.price())).toString(10));
-        // assert.equal(BigNumber(await presaleToken.balanceOf(accounts[1])).toString(), BigNumber(transferAmount * BigNumber(await seedingSetting.price())).toString());
     });
 
     it("Buy token fail because buyer dont approve Presale to transfer stable coin", async() => {

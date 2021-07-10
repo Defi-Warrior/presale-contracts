@@ -58,10 +58,11 @@ contract("DefiWarriorToken", async accounts => {
                                     busd.address,
                                     presaleToken.address);
         
-        await presaleToken.approve(presale.address, BigInt(await presaleToken.totalSupply()));
         await presaleToken.setLocker(locker.address);
 
         await locker.setPresaleAddress(presale.address);
+
+        await presaleToken.transfer(presale.address, expandTo18Decimals(1500000000));
 
         console.log("presale addr: ", presale.address);
         console.log("Block number: ", block.number);
