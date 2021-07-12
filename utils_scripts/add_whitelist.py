@@ -7,10 +7,10 @@ from web3 import Web3
 
 
 # tesnet provider
-PROVIDER = os.environ.get("PROVIDER", "https://data-seed-prebsc-1-s1.binance.org:8545/")
+# PROVIDER = os.environ.get("PROVIDER", "https://data-seed-prebsc-1-s1.binance.org:8545/")
 # mainnet provider
-# PROVIDER = "https://bsc-dataseed.binance.org/"
-AIRDROP_ADDRESS = os.environ.get("AIR_DROP_ADDRESS", '0x99E6714bEE9Ad9066f63ee7F20b0ff10f17B1865') #testnet
+PROVIDER = "https://bsc-dataseed.binance.org/"
+AIRDROP_ADDRESS = os.environ.get("AIR_DROP_ADDRESS", '0x1941B6189aa855732898a16bD44694d351F725a5')
 with open("./air_drop_abi.json", "r") as f:
     ABI = json.load(f)
 
@@ -42,8 +42,8 @@ def main(args: dict):
         if len(input_addr) == 100 or i == len(addresses) - 1:
             amounts = [666000000000000000000] * len(input_addr)
             tx = contract.functions.updateBalance(input_addr, amounts).buildTransaction({
-                'chainId': os.environ.get("CHAIN_ID", 97),
-                'gasPrice': Web3.toWei('10', 'gwei'),
+                'chainId': os.environ.get("CHAIN_ID", 56),
+                'gasPrice': Web3.toWei('5', 'gwei'),
                 'nonce': nonce,
                 'from': caller
             })
