@@ -12,23 +12,29 @@ import "./extensions/IERC20.sol";
 contract AirDrop is Ownable {
 
     // contains amount that each user can withdraw
-    mapping(address => uint256) public balances;
+    mapping(address => bool) public claimed;
+    mapping(address => bool) public whitelist;
     // token used for airdrop event
     IERC20 public token;
+    uint256 public GIVE_AWAY_AMOUNT = 888000000000000000000;
 
     constructor(address token_addr) {
         token = IERC20(token_addr);
     }
 
-    function updateBalance(address[] memory addrs, uint256[] memory newBalances) external onlyOwner {
+    function updateWhitelist(address[] memory addrs, bool[] memory permission) external onlyOwner {
         for (uint i = 0; i < addrs.length; i++)
-            balances[addrs[i]] = newBalances[i];
+            whitelist[addrs[i]] = permission[i];
+    }
+
+    function updateGiveAwayAmount(uint256 value) public onlyOwner {
+        GIVE_AWAY_AMOUNT = value;
     }
 
     function claim() external {
-        uint256 amount = balances[msg.sender];
-        balances[msg.sender] = 0;
-        token.transferFrom(owner(), msg.sender, amount);
+        require(!claimed[msg.sender] && whitelist[msg.sender], "claimed or not in whitelist");
+        claimed[msg.sender] = true;
+        token.transferFrom(owner(), msg.sender, GIVE_AWAY_AMOUNT);
     }
 
 }
