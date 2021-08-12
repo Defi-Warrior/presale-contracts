@@ -30,14 +30,8 @@
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "balances",
+		"inputs": [],
+		"name": "GIVE_AWAY_AMOUNT",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -53,6 +47,25 @@
 		"name": "claim",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "claimed",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -104,19 +117,51 @@
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "updateGiveAwayAmount",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address[]",
 				"name": "addrs",
 				"type": "address[]"
 			},
 			{
-				"internalType": "uint256[]",
-				"name": "newBalances",
-				"type": "uint256[]"
+				"internalType": "bool[]",
+				"name": "permission",
+				"type": "bool[]"
 			}
 		],
-		"name": "updateBalance",
+		"name": "updateWhitelist",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "whitelist",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	}
 ]
