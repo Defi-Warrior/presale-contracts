@@ -33,6 +33,7 @@ contract Locker is Ownable {
      */
     function lock(address addr, uint256 amount, uint256 start, uint256 end) onlyOwner external {
         require(start < end, "Invalid lock time");
+        whitelist[addr] = true;
         uint256 duration = end - start;
         uint256 rewardPerBlock = amount / duration;
         uint256 remainder = amount - rewardPerBlock * duration;
