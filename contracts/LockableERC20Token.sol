@@ -294,7 +294,7 @@ contract DefiWarriorToken is Ownable, ERC20 {
   // metadata
   string public version = "1.0";
 
-  // Ethermon payment
+  // Locker to prevent early bird users to spend token after purchase
   ILocker public locker;
 
   // constructor
@@ -312,6 +312,7 @@ contract DefiWarriorToken is Ownable, ERC20 {
     address recipient,
     uint256 amount
   ) internal virtual override {
+    // check lock before transfer
     if (address(locker) != address(0)) {
         if (locker.checkLock(sender, balanceOf(sender) - amount))
             revert("You token has been locked");

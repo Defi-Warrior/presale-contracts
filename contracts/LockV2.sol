@@ -5,7 +5,7 @@
 
 pragma solidity ^0.8.0;
 
-import "./Ownable.sol";
+import "./utils/Ownable.sol";
 
 
 struct LockRecord {
@@ -24,9 +24,15 @@ contract Locker is Ownable {
     //mapping from address to presale stage -> lock amount
     mapping(address => LockRecord) public lockRecords;
 
+    bool public IDOStarted;
+
     event Lock(address addr, uint start, uint end, uint amount);
 
     constructor() {}
+
+    function unlockForIDO(bool _value) external onlyOwner {
+        IDOStarted = _value;
+    }
 
     /**
      * @dev lock an account from transfering CORI token in a specific block number
@@ -53,8 +59,13 @@ contract Locker is Ownable {
     function getLockedAmount(address addr) public view returns(uint256) {
         LockRecord memory lockRecord = lockRecords[addr];
 
+        // unlock 5% of fund after IDO start
+        if (IDOStarted)
+            lockRecord.lockAmount -= lockRecord.lockAmount * 5 / 100;
+
         if (block.number <= lockRecord.start)
             return lockRecord.lockAmount;
+
         if (block.number >= lockRecord.end)
             return 0;
 
