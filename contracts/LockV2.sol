@@ -16,7 +16,7 @@ struct LockRecord {
     uint256 rewardPerBlock;
 }
 
-contract Locker is Ownable {
+contract LockerV2 is Ownable {
     // contains addresses that were in the seeding, private sale or marketing campaign
     // these addresses will be locked from sending their token to other addresses in different durations
     // these lock durations will be stored in lockRecords
@@ -41,8 +41,12 @@ contract Locker is Ownable {
         require(start < end, "Invalid lock time");
         whitelist[addr] = true;
         uint256 duration = end - start;
+        // duration always > 0
         uint256 rewardPerBlock = amount / duration;
-        uint256 remainder = amount - rewardPerBlock * duration;
+        uint256 remainder = 0;
+        // safety check
+        if (rewardPerBlock * duration <= amount)
+            remainder = amount - rewardPerBlock * duration;
             
         LockRecord memory lockRecord = LockRecord({
             start: start,
@@ -69,7 +73,11 @@ contract Locker is Ownable {
         if (block.number >= lockRecord.end)
             return 0;
 
-        return lockRecord.lockAmount - (lockRecord.rewardPerBlock * (block.number - lockRecord.start));
+        uint256 unlockedAmount = (lockRecord.rewardPerBlock * (block.number - lockRecord.start));
+        if (unlockedAmount <= lockRecord.lockAmount)
+            return lockRecord.lockAmount - unlockedAmount;
+            
+        return 0;
     }
 
      /**
