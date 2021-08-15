@@ -45,17 +45,9 @@ contract("DefiWarriorToken", async accounts => {
         let block = await web3.eth.getBlock("latest");
 
         await locker.lock(accounts[0], expandTo18Decimals(100), block.number, block.number + 10000);
-
-        let lockRecord = await locker.lockRecords(accounts[0]);
-
         await locker.unlockForIDO(true);
 
-        console.log((await locker.getLockedAmount(accounts[0])).toString(), expandTo18Decimals(5).toString())
-        // assert.equal(BigNumber(await locker.getLockedAmount(accounts[0])), expandTo18Decimals(5))
-
-        // block = await web3.eth.getBlock("latest");
-
-        // await presaleToken.transfer(accounts[2], BigNumber((block.number - lockRecord.start)*10**16))
+        assert.equal((await locker.getLockedAmount(accounts[0])).toString(), "94980000000000000000")
     });
 
 })

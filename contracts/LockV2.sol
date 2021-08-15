@@ -40,8 +40,9 @@ contract LockerV2 is Ownable {
     function lock(address addr, uint256 amount, uint256 start, uint256 end) onlyOwner external {
         require(start < end, "Invalid lock time");
         whitelist[addr] = true;
+        
         uint256 duration = end - start;
-        // duration always > 0
+        // duration always > 0 so this divide operator won't throw
         uint256 rewardPerBlock = amount / duration;
         uint256 remainder = 0;
         // safety check
@@ -67,6 +68,7 @@ contract LockerV2 is Ownable {
         if (IDOStarted)
             lockRecord.lockAmount -= lockRecord.lockAmount * 5 / 100;
 
+        // havest time is not started 
         if (block.number <= lockRecord.start)
             return lockRecord.lockAmount;
 
@@ -74,6 +76,7 @@ contract LockerV2 is Ownable {
             return 0;
 
         uint256 unlockedAmount = (lockRecord.rewardPerBlock * (block.number - lockRecord.start));
+        // need this check because we unlock 5% when IDO start
         if (unlockedAmount <= lockRecord.lockAmount)
             return lockRecord.lockAmount - unlockedAmount;
             
