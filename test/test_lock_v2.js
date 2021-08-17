@@ -73,4 +73,10 @@ contract("DefiWarriorToken", async accounts => {
         assert.equal(await locker.getLockedAmount(accounts[0]), 20000)
     });
 
+    it("Transfer amount exceed balance", async() => {
+        let block = await web3.eth.getBlock("latest");
+        await locker.lock(accounts[0], 10000, block.number + 1, block.number + 101);
+        await expectThrow(presaleToken.transfer(accounts[2], 10001))
+    });
+
 })
