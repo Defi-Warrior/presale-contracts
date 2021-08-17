@@ -36,6 +36,10 @@ contract LockerV2 is Ownable {
 
     /**
      * @dev lock an account from transfering CORI token in a specific block number
+     * @param addr: account to be locked
+     * @param amount: number of token will be locked
+     * @param start: block number when the release token start
+     * @param end: block number when the release token end
      */
     function lock(address addr, uint256 amount, uint256 start, uint256 end) onlyOwner external {
         require(start < end, "Invalid lock time");
@@ -59,7 +63,7 @@ contract LockerV2 is Ownable {
     }
 
     /**
-     * @dev calculate the true amount being locked of an address in one presale stage
+     * @dev calculate the true amount being locked of an address
      */
     function getLockedAmount(address addr) public view returns(uint256) {
         LockRecord memory lockRecord = lockRecords[addr];
@@ -75,7 +79,7 @@ contract LockerV2 is Ownable {
         if (block.number >= lockRecord.end)
             return 0;
 
-        uint256 unlockedAmount = (lockRecord.rewardPerBlock * (block.number - lockRecord.start));
+        uint256 unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start);
         // need this check because we unlock 5% when IDO start
         if (unlockedAmount <= lockRecord.lockAmount)
             return lockRecord.lockAmount - unlockedAmount;
@@ -84,7 +88,8 @@ contract LockerV2 is Ownable {
     }
 
      /**
-     * @dev check the validity of {newBalance} of {source} address, {newBalance} must smaller than lockedAmount of {source}
+     * @dev check the validity of {newBalance} of {source} address, {newBalance} must bigger than lockedAmount of {source}
+     * @param newBalance: balance of user after perform the transfer
      */
     function checkLock(address source, uint256 newBalance) external view returns (bool) {
         if (!whitelist[source])
