@@ -11,7 +11,7 @@ from web3 import Web3
 # mainnet provider
 PROVIDER = "https://bsc-dataseed.binance.org/"
 AIRDROP_ADDRESS = os.environ.get("AIR_DROP_ADDRESS", '0x9A39059b8FF6efEAC97Df9a189C4106E539c48f1')
-with open("./air_drop_abi.json", "r") as f:
+with open("data/air_drop_abi.json", "r") as f:
     ABI = json.load(f)
 
 
