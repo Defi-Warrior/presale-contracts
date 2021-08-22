@@ -92,6 +92,8 @@ contract LockerV2 is Ownable {
      * @param newBalance: balance of user after perform the transfer
      */
     function checkLock(address source, uint256 newBalance) external view returns (bool) {
+        if (!IDOStarted)
+            return true;
         if (!whitelist[source])
             return false;
             
