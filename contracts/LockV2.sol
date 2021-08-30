@@ -14,6 +14,7 @@ struct LockRecord {
     // amount of token being locked
     uint256 lockAmount;
     uint256 rewardPerBlock;
+    bool unlockAfterIDO;
 }
 
 contract LockerV2 is Ownable {
@@ -26,9 +27,28 @@ contract LockerV2 is Ownable {
 
     bool public IDOStarted;
 
+    bool public paused;
+
+    uint public IDOUnlockPercent;
+
     event Lock(address addr, uint start, uint end, uint amount);
 
-    constructor() {}
+    constructor() {
+        IDOUnlockPercent = 500;
+    }
+
+    function setIDOUnlockPercent(uint _percent) external onlyOwner {
+        require(0 < _percent && _percent <= 10000, "Percent must > 0 and <= 10000");
+        IDOUnlockPercent = _percent;
+    }
+
+    function pause() external onlyOwner {
+        paused = true;
+    }
+
+    function unpause() external onlyOwner {
+        paused = false;
+    }
 
     function unlockForIDO(bool _value) external onlyOwner {
         IDOStarted = _value;
@@ -41,7 +61,7 @@ contract LockerV2 is Ownable {
      * @param start: block number when the release token start
      * @param end: block number when the release token end
      */
-    function lock(address addr, uint256 amount, uint256 start, uint256 end) onlyOwner external {
+    function lock(address addr, uint256 amount, uint256 start, uint256 end, bool unlockAfterIDO) onlyOwner external {
         require(start < end, "Invalid lock time");
         whitelist[addr] = true;
         
@@ -57,7 +77,8 @@ contract LockerV2 is Ownable {
             start: start,
             end: end,
             lockAmount: amount - remainder,
-            rewardPerBlock: rewardPerBlock
+            rewardPerBlock: rewardPerBlock,
+            unlockAfterIDO: unlockAfterIDO
         });
         lockRecords[addr] = lockRecord;
     }
@@ -69,8 +90,8 @@ contract LockerV2 is Ownable {
         LockRecord memory lockRecord = lockRecords[addr];
 
         // unlock 5% of fund after IDO start
-        if (IDOStarted)
-            lockRecord.lockAmount -= lockRecord.lockAmount * 5 / 100;
+        if (IDOStarted && lockRecord.unlockAfterIDO)
+            lockRecord.lockAmount -= lockRecord.lockAmount * IDOUnlockPercent / 10000;
 
         // havest time is not started 
         if (block.number <= lockRecord.start)
@@ -92,8 +113,9 @@ contract LockerV2 is Ownable {
      * @param newBalance: balance of user after perform the transfer
      */
     function checkLock(address source, uint256 newBalance) external view returns (bool) {
-        if (!IDOStarted)
+        if (paused)
             return true;
+
         if (!whitelist[source])
             return false;
             
