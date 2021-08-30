@@ -97,5 +97,10 @@ contract("DefiWarriorToken", async accounts => {
         assert.equal(await locker.getLockedAmount(accounts[1]), 9300);
     });
 
-
+    it("Test transferFrom", async() => {
+        let block = await web3.eth.getBlock("latest");
+        await locker.lock(accounts[0], 10000, block.number + 1, block.number + 101, false);
+        await presaleToken.approve(accounts[5], 10000);
+        await expectThrow(presaleToken.transferFrom(accounts[0], accounts[1], 1000, {from: accounts[5]}))
+    });
 })  
