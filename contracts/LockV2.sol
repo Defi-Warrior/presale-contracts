@@ -116,6 +116,7 @@ contract LockerV2 is Ownable {
         if (paused)
             return true;
 
+        // address not in whitelist, no look needed
         if (!whitelist[source])
             return false;
             
@@ -123,7 +124,7 @@ contract LockerV2 is Ownable {
 
         if (lockAmount == 0)
             return false;
-
+            
         if (newBalance < lockAmount)
             return true;
         return false;
