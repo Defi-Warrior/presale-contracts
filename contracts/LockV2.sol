@@ -6,6 +6,7 @@
 pragma solidity ^0.8.0;
 
 import "./utils/Ownable.sol";
+import "./extensions/IERC20.sol";
 
 
 struct LockRecord {
@@ -29,7 +30,13 @@ contract LockerV2 is Ownable {
 
     bool public paused;
 
+    bool public limitedTrading;
+
+    uint public tradingLimit = 1000*10**18;
+
     uint public IDOUnlockPercent;
+
+    IERC20 public fiwa;
 
     event Lock(address addr, uint start, uint end, uint amount);
 
@@ -52,6 +59,18 @@ contract LockerV2 is Ownable {
 
     function unlockForIDO(bool _value) external onlyOwner {
         IDOStarted = _value;
+    }
+
+    function enableTradingLimit() external onlyOwner {
+        limitedTrading = true;
+    }
+
+    function disableTradingLimit() external onlyOwner {
+        limitedTrading = false;
+    }
+
+    function updateTradingLimit(uint _value) external onlyOwner {
+        tradingLimit = _value;
     }
 
     /**
@@ -116,6 +135,10 @@ contract LockerV2 is Ownable {
         if (paused)
             return true;
 
+        if (limitedTrading) {
+            if (fiwa.balanceOf(source) - newBalance > tradingLimit) 
+                return true;
+        }
         // address not in whitelist, no look needed
         if (!whitelist[source])
             return false;
