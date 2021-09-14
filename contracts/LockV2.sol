@@ -7,6 +7,7 @@ pragma solidity ^0.8.0;
 
 import "./utils/Ownable.sol";
 import "./extensions/IERC20.sol";
+import "./extensions/ILocker.sol";
 
 
 struct LockRecord {
@@ -15,10 +16,11 @@ struct LockRecord {
     // amount of token being locked
     uint256 lockAmount;
     uint256 rewardPerBlock;
+    // unlock 5% after IDO or not
     bool unlockAfterIDO;
 }
 
-contract LockerV2 is Ownable {
+contract LockerV2 is Ownable, ILocker {
     // contains addresses that were in the seeding, private sale or marketing campaign
     // these addresses will be locked from sending their token to other addresses in different durations
     // these lock durations will be stored in lockRecords
@@ -90,7 +92,7 @@ contract LockerV2 is Ownable {
      * @param start: block number when the release token start
      * @param end: block number when the release token end
      */
-    function lock(address addr, uint256 amount, uint256 start, uint256 end, bool unlockAfterIDO) onlyOwner external {
+    function lock(address addr, uint256 amount, uint256 start, uint256 end, bool unlockAfterIDO) onlyOwner external override {
         require(start < end, "Invalid lock time");
         whitelist[addr] = true;
         
@@ -141,13 +143,14 @@ contract LockerV2 is Ownable {
      * @dev check the validity of {newBalance} of {source} address, {newBalance} must bigger than lockedAmount of {source}
      * @param newBalance: balance of user after perform the transfer
      */
-    function checkLock(address source, uint256 newBalance) external view returns (bool) {
+    function checkLock(address source, uint256 newBalance) external view override returns (bool) {
+        // admin addresses have the right to send token because they need to distribute tokens to users
         if (admins[source])
             return false;
-
+        // cant trading during paused time, this is only happen before IDO
         if (paused)
             return true;
-
+        // limit trading amount in a short moment (5 minutes) to prevent bots to bump the price and hurt our user
         if (limitedTrading) {
             if (fiwa.balanceOf(source) - newBalance > tradingLimit) 
                 return true;
