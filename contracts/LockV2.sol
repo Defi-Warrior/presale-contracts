@@ -6,6 +6,8 @@
 pragma solidity ^0.8.0;
 
 import "./utils/Ownable.sol";
+import "./extensions/IERC20.sol";
+import "./extensions/ILocker.sol";
 
 
 struct LockRecord {
@@ -14,32 +16,49 @@ struct LockRecord {
     // amount of token being locked
     uint256 lockAmount;
     uint256 rewardPerBlock;
+    // unlock 5% after IDO or not
     bool unlockAfterIDO;
 }
 
-contract LockerV2 is Ownable {
+contract LockerV2 is Ownable, ILocker {
     // contains addresses that were in the seeding, private sale or marketing campaign
     // these addresses will be locked from sending their token to other addresses in different durations
     // these lock durations will be stored in lockRecords
     mapping(address => bool) public whitelist;
     //mapping from address to presale stage -> lock amount
     mapping(address => LockRecord) public lockRecords;
-
-    bool public IDOStarted;
+    // list of people allowed to trade when we add liquidity on DEX
+    mapping(address => bool) public admins;
 
     bool public paused;
 
+    bool public limitedTrading;
+
+    uint public tradingLimit = 1000*10**18;
+
     uint public IDOUnlockPercent;
+
+    uint public IDOStartBlock;
+
+    IERC20 public fiwa;
 
     event Lock(address addr, uint start, uint end, uint amount);
 
-    constructor() {
+    constructor(address _fiwa) {
         IDOUnlockPercent = 500;
+        fiwa = IERC20(_fiwa);
+        //unlock 5% after this block (10pm 07-09-2021)
+        IDOStartBlock = 10710000;
+        admins[msg.sender] = true;
     }
 
     function setIDOUnlockPercent(uint _percent) external onlyOwner {
-        require(0 < _percent && _percent <= 10000, "Percent must > 0 and <= 10000");
+        require(0 <= _percent && _percent <= 10000, "Percent must > 0 and <= 10000");
         IDOUnlockPercent = _percent;
+    }
+
+    function setAdmin(address addr, bool authorized) external onlyOwner {
+        admins[addr] = authorized;
     }
 
     function pause() external onlyOwner {
@@ -50,8 +69,20 @@ contract LockerV2 is Ownable {
         paused = false;
     }
 
-    function unlockForIDO(bool _value) external onlyOwner {
-        IDOStarted = _value;
+    function setIDOBlock(uint _block) external onlyOwner {
+        IDOStartBlock = _block;
+    }
+
+    function enableTradingLimit() external onlyOwner {
+        limitedTrading = true;
+    }
+
+    function disableTradingLimit() external onlyOwner {
+        limitedTrading = false;
+    }
+
+    function updateTradingLimit(uint _limit) external onlyOwner {
+        tradingLimit = _limit;
     }
 
     /**
@@ -61,7 +92,7 @@ contract LockerV2 is Ownable {
      * @param start: block number when the release token start
      * @param end: block number when the release token end
      */
-    function lock(address addr, uint256 amount, uint256 start, uint256 end, bool unlockAfterIDO) onlyOwner external {
+    function lock(address addr, uint256 amount, uint256 start, uint256 end, bool unlockAfterIDO) onlyOwner external override {
         require(start < end, "Invalid lock time");
         whitelist[addr] = true;
         
@@ -90,7 +121,7 @@ contract LockerV2 is Ownable {
         LockRecord memory lockRecord = lockRecords[addr];
 
         // unlock 5% of fund after IDO start
-        if (IDOStarted && lockRecord.unlockAfterIDO)
+        if (block.number >= IDOStartBlock && lockRecord.unlockAfterIDO)
             lockRecord.lockAmount -= lockRecord.lockAmount * IDOUnlockPercent / 10000;
 
         // havest time is not started 
@@ -112,10 +143,18 @@ contract LockerV2 is Ownable {
      * @dev check the validity of {newBalance} of {source} address, {newBalance} must bigger than lockedAmount of {source}
      * @param newBalance: balance of user after perform the transfer
      */
-    function checkLock(address source, uint256 newBalance) external view returns (bool) {
+    function checkLock(address source, uint256 newBalance) external view override returns (bool) {
+        // admin addresses have the right to send token because they need to distribute tokens to users
+        if (admins[source])
+            return false;
+        // cant trading during paused time, this is only happen before IDO
         if (paused)
             return true;
-
+        // limit trading amount in a short moment (5 minutes) to prevent bots to bump the price and hurt our user
+        if (limitedTrading) {
+            if (fiwa.balanceOf(source) - newBalance > tradingLimit) 
+                return true;
+        }
         // address not in whitelist, no look needed
         if (!whitelist[source])
             return false;
@@ -127,6 +166,7 @@ contract LockerV2 is Ownable {
             
         if (newBalance < lockAmount)
             return true;
+
         return false;
     }
 }

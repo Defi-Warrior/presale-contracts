@@ -18,9 +18,8 @@ contract("DefiWarriorToken", async accounts => {
 
     beforeEach(async () => {
 
-        locker = await Locker.new();
-
         presaleToken = await DefiWarriorToken.new();
+        locker = await Locker.new(presaleToken.address);
 
         await presaleToken.transfer(accounts[5], expandTo18Decimals(10000000000))
         await presaleToken.transfer(accounts[0], 10000, {from: accounts[5]})
@@ -28,6 +27,10 @@ contract("DefiWarriorToken", async accounts => {
         await presaleToken.transfer(accounts[2], 10000, {from: accounts[5]})
 
         await presaleToken.setLocker(locker.address);
+
+        await locker.setAdmin(accounts[0], false);
+        await locker.enableTradingLimit();
+        await locker.updateTradingLimit(1000);
     });
 
     it("Successfully lock all token", async() => {
@@ -48,7 +51,7 @@ contract("DefiWarriorToken", async accounts => {
         let block = await web3.eth.getBlock("latest");
 
         await locker.lock(accounts[0], 10000, block.number + 1, block.number + 101, true);
-        await locker.unlockForIDO(true);
+        await locker.setIDOBlock(block.number);
 
         assert.equal(await locker.getLockedAmount(accounts[0]), 9400)
     });
@@ -92,7 +95,7 @@ contract("DefiWarriorToken", async accounts => {
         let block = await web3.eth.getBlock("latest");
         await locker.lock(accounts[0], 10000, block.number + 1, block.number + 101, false);
         await locker.lock(accounts[1], 10000, block.number + 1, block.number + 101, true);
-        await locker.unlockForIDO(true);
+        await locker.setIDOBlock(block.number);
         assert.equal(await locker.getLockedAmount(accounts[0]), 9800);
         assert.equal(await locker.getLockedAmount(accounts[1]), 9300);
     });
@@ -103,4 +106,15 @@ contract("DefiWarriorToken", async accounts => {
         await presaleToken.approve(accounts[5], 10000);
         await expectThrow(presaleToken.transferFrom(accounts[0], accounts[1], 1000, {from: accounts[5]}))
     });
+
+    it("Test limit trading amount", async() => {
+        let block = await web3.eth.getBlock("latest");
+        // await locker.lock(accounts[0], 10000, block.number + 1, block.number + 101, false);
+        await presaleToken.approve(accounts[5], 10000);
+        await presaleToken.transfer(accounts[2], 1000);
+        await expectThrow(presaleToken.transfer(accounts[2], 1001));
+        await locker.disableTradingLimit();
+        await presaleToken.transfer(accounts[2], 1001);
+    });
+
 })  
