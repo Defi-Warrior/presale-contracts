@@ -9,5 +9,4 @@ module.exports = async function(deployer) {
     await deployer.deploy(Locker, token.address)
     const locker = await Locker.deployed()
     await token.setLocker(locker.address)
-
 };
