@@ -59,10 +59,6 @@ contract LockerV2 is Ownable, ILocker {
         IDOUnlockPercent = _percent;
     }
 
-    function power18(uint _value) public pure returns (uint) {
-        return _value * 10**18;
-    }
-
     function setIDOBlock(uint _block) external onlyOwner {
         IDOStartBlock = _block;
     }
