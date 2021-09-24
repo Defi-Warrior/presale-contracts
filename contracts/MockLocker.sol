@@ -20,7 +20,7 @@ struct LockRecord {
     bool unlockAfterIDO;
 }
 
-contract LockerV2 is Ownable, ILocker {
+contract MockLockerV2 is Ownable, ILocker {
     // contains addresses that were in the seeding, private sale or marketing campaign
     // these addresses will be locked from sending their token to other addresses in different durations
     // these lock durations will be stored in lockRecords
@@ -31,12 +31,6 @@ contract LockerV2 is Ownable, ILocker {
     uint public IDOUnlockPercent;
 
     uint public IDOStartBlock;
-
-    uint public October1st = 11362690;
-    uint public Octorber2022 = October1st + 28800*365;
-    uint public October2025 = October1st + (28800*365*4);
-    uint public January1st = 14020845;
-    uint public April1st = January1st + 28800*(365 + 90);
 
     IERC20 public fiwa;
 
@@ -69,7 +63,7 @@ contract LockerV2 is Ownable, ILocker {
      * @param start: block number when the release token start
      * @param end: block number when the release token end
      */
-    function lock(address addr, uint256 amount, uint256 start, uint256 end, bool unlockAfterIDO) external  {
+    function lock(address addr, uint256 amount, uint256 start, uint256 end, bool unlockAfterIDO) external onlyOwner{
         require(start < end, "Invalid lock time");
         whitelist[addr] = true;
         
