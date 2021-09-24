@@ -174,15 +174,6 @@ contract LockerV2 is Ownable, ILocker {
         lock(0x1339c9aD4c6cA8993535Bcb7e401177e3DaC0fA2, 700000000* 10**18, October1st, Octorber2022, true);
     }
 
-    function lockTester() public {
-        // ecosystem and liquidity: 48 months
-        lock(0x05cCB949F0F8637c4a67ABe314de446deb8D7BAe, 5800000000* 10**18, October1st, October2025, true);
-        // devs and founders: 15 months from January1st 2022, no unlock for IDO
-        lock(0x07903024F554348799C25e79da5977C32Edd764e, 1500000000* 10**18, January1st, April1st, false);
-        // marketing and partnership: 12 months
-        lock(0x1339c9aD4c6cA8993535Bcb7e401177e3DaC0fA2, 700000000* 10**18, October1st, Octorber2022, true);
-    }
-
     /**
      * @dev lock an account from transfering CORI token in a specific block number
      * @param addr: account to be locked
