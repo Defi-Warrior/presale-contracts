@@ -10,7 +10,7 @@ const tests = require("@daonomic/tests-common");
 const expectThrow = tests.expectThrow;
 
 const DefiWarriorToken = artifacts.require("DefiWarriorToken");
-const Locker = artifacts.require("LockerV2");
+const Locker = artifacts.require("MockLockerV2");
 
 contract("DefiWarriorToken", async accounts => {
 
@@ -27,10 +27,6 @@ contract("DefiWarriorToken", async accounts => {
         await presaleToken.transfer(accounts[2], 10000, {from: accounts[5]})
 
         await presaleToken.setLocker(locker.address);
-
-        await locker.setAdmin(accounts[0], false);
-        await locker.enableTradingLimit();
-        await locker.updateTradingLimit(1000);
     });
 
     it("Successfully lock all token", async() => {
@@ -82,15 +78,6 @@ contract("DefiWarriorToken", async accounts => {
         await expectThrow(presaleToken.transfer(accounts[2], 10001))
     });
 
-    it("Cant transfer during paused time", async() => {
-        await locker.pause();
-        await expectThrow(presaleToken.transfer(accounts[2], 100));
-        await expectThrow(presaleToken.transfer(accounts[1], 100, {from: accounts[0]}));
-        await locker.unpause();
-        await presaleToken.transfer(accounts[2], 100);
-        await presaleToken.transfer(accounts[1], 100, {from: accounts[0]});
-    });
-
     it("Unlock amount = 0 after IDO", async() => {
         let block = await web3.eth.getBlock("latest");
         await locker.lock(accounts[0], 10000, block.number + 1, block.number + 101, false);
@@ -106,15 +93,4 @@ contract("DefiWarriorToken", async accounts => {
         await presaleToken.approve(accounts[5], 10000);
         await expectThrow(presaleToken.transferFrom(accounts[0], accounts[1], 1000, {from: accounts[5]}))
     });
-
-    it("Test limit trading amount", async() => {
-        let block = await web3.eth.getBlock("latest");
-        // await locker.lock(accounts[0], 10000, block.number + 1, block.number + 101, false);
-        await presaleToken.approve(accounts[5], 10000);
-        await presaleToken.transfer(accounts[2], 1000);
-        await expectThrow(presaleToken.transfer(accounts[2], 1001));
-        await locker.disableTradingLimit();
-        await presaleToken.transfer(accounts[2], 1001);
-    });
-
 })  
