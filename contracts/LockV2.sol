@@ -32,11 +32,20 @@ contract LockerV2 is Ownable, ILocker {
 
     uint public IDOStartBlock;
 
+    uint public PhaseOneEndBlock;
+    uint public PhaseTwoStartBlock;
+    // 1 day = 28800 blocks
+    uint public LockDuration = 90 * 28800;
+
     uint public October1st = 11362690;
-    uint public Octorber2022 = October1st + 28800*365;
-    uint public October2025 = October1st + (28800*365*4);
-    uint public January1st = 14020845;
-    uint public April1st = January1st + 28800*(365 + 90);
+    // 1 year
+    uint public InvestorEndVestingBlock = October1st + 28800*365;
+    // 4 years
+    uint public EcosystemEndVestingBlock = October1st + (28800*365*4);
+    // 14020845 <=> January 1st 2022
+    uint public DevAndFouderStartVestingBlock = 14020845;
+    // 15 months
+    uint public DevAndFouderEndVestingBlock = DevAndFouderStartVestingBlock + 28800*(365 + 90);
 
     IERC20 public fiwa;
 
@@ -221,7 +230,7 @@ contract LockerV2 is Ownable, ILocker {
 
         if (block.number >= lockRecord.end)
             return 0;
-
+        
         uint256 unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start);
         // need this check because we unlock 5% when IDO start
         if (unlockedAmount <= lockRecord.lockAmount)
