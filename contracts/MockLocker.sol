@@ -32,6 +32,11 @@ contract MockLockerV2 is Ownable, ILocker {
 
     uint public IDOStartBlock;
 
+    // phase one end at 20/11/2021
+    uint public PhaseOneEndBlock = 12796000;
+    // 1 day = 28800 blocks
+    uint public LockDuration = 90 * 28800;
+
     IERC20 public fiwa;
 
     event Lock(address addr, uint start, uint end, uint amount, bool unlockAfterIDO);
@@ -92,6 +97,7 @@ contract MockLockerV2 is Ownable, ILocker {
      */
     function getLockedAmount(address addr) public view returns(uint256) {
         LockRecord memory lockRecord = lockRecords[addr];
+        lockRecord.end += LockDuration;
 
         // unlock 5% of fund after IDO start
         if (block.number >= IDOStartBlock && lockRecord.unlockAfterIDO)
@@ -104,7 +110,14 @@ contract MockLockerV2 is Ownable, ILocker {
         if (block.number >= lockRecord.end)
             return 0;
 
-        uint256 unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start);
+        uint256 unlockedAmount;
+        // vesting normally from start to phase one end
+        if (block.number <= PhaseOneEndBlock)
+            unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start);
+
+        if (block.number > PhaseOneEndBlock + LockDuration)
+            unlockedAmount += lockRecord.rewardPerBlock * (block.number - (PhaseOneEndBlock + LockDuration));
+
         // need this check because we unlock 5% when IDO start
         if (unlockedAmount <= lockRecord.lockAmount)
             return lockRecord.lockAmount - unlockedAmount;
