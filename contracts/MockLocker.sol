@@ -121,9 +121,8 @@ contract MockLockerV2 is Ownable, ILocker {
         uint256 unlockedAmount;
         // vesting normally from start to phase one end
         if (block.number <= PhaseOneEndBlock)
-            unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start);
-            
-        if (block.number <= PhaseOneEndBlock + LockDuration )
+            unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start); 
+        else if (block.number <= PhaseOneEndBlock + LockDuration )
             unlockedAmount = lockRecord.rewardPerBlock * (PhaseOneEndBlock - lockRecord.start);
 
         if (block.number > PhaseOneEndBlock + LockDuration)
