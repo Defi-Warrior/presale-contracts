@@ -60,6 +60,14 @@ contract MockLockerV2 is Ownable, ILocker {
     function setIDOBlock(uint _block) external onlyOwner {
         IDOStartBlock = _block;
     }
+
+    function setLockDuration(uint _blockNumber) external onlyOwner {
+        LockDuration = _blockNumber;
+    }
+
+    function setPhaseOneEndBlock(uint _blockNumber) external onlyOwner {
+        PhaseOneEndBlock = _blockNumber;
+    }
     
     /**
      * @dev lock an account from transfering CORI token in a specific block number
@@ -114,9 +122,12 @@ contract MockLockerV2 is Ownable, ILocker {
         // vesting normally from start to phase one end
         if (block.number <= PhaseOneEndBlock)
             unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start);
+            
+        if (block.number <= PhaseOneEndBlock + LockDuration )
+            unlockedAmount = lockRecord.rewardPerBlock * (PhaseOneEndBlock - lockRecord.start);
 
         if (block.number > PhaseOneEndBlock + LockDuration)
-            unlockedAmount += lockRecord.rewardPerBlock * (block.number - (PhaseOneEndBlock + LockDuration));
+            unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start - LockDuration);
 
         // need this check because we unlock 5% when IDO start
         if (unlockedAmount <= lockRecord.lockAmount)

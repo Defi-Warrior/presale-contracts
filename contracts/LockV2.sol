@@ -76,6 +76,10 @@ contract LockerV2 is Ownable, ILocker {
         LockDuration = _blockNumber;
     }
 
+    function setPhaseOneEndBlock(uint _blockNumber) external onlyOwner {
+        PhaseOneEndBlock = _blockNumber;
+    }
+
     function lockInvestorGroupOne() internal {
         lock(0x86Ca3b84B77F65913baA9d324dBF838a2FD9db66, 50000000* 10**18, October1st, InvestorEndVestingBlock, true);
         lock(0xB9a85Cf9C0b71Ab3245cb7BCF2da572AE1DC58Bf, 105000000* 10**18, October1st, InvestorEndVestingBlock, true);
@@ -240,9 +244,12 @@ contract LockerV2 is Ownable, ILocker {
         // vesting normally from start to phase one end
         if (block.number <= PhaseOneEndBlock)
             unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start);
+            
+        if (block.number <= PhaseOneEndBlock + LockDuration )
+            unlockedAmount = lockRecord.rewardPerBlock * (PhaseOneEndBlock - lockRecord.start);
 
         if (block.number > PhaseOneEndBlock + LockDuration)
-            unlockedAmount += lockRecord.rewardPerBlock * (block.number - (PhaseOneEndBlock + LockDuration));
+            unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start - LockDuration);
 
         // need this check because we unlock 5% when IDO start
         if (unlockedAmount <= lockRecord.lockAmount)
