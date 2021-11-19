@@ -33,9 +33,9 @@ contract LockerV2 is Ownable, ILocker {
     uint public IDOStartBlock;
 
     // phase one end at 20/11/2021
-    uint public PhaseOneEndBlock = 12796000;
+    uint public PhaseOneEndBlock = 12806932;
     // 1 day = 28800 blocks
-    uint public LockDuration = 90 * 28800;
+    uint public LockDuration = 91 * 28800;
 
     uint public October1st = 11362690;
     // 1 year
@@ -189,6 +189,8 @@ contract LockerV2 is Ownable, ILocker {
         lock(0x07903024F554348799C25e79da5977C32Edd764e, 1500000000* 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, false);
         // marketing and partnership: 12 months
         lock(0x1339c9aD4c6cA8993535Bcb7e401177e3DaC0fA2, 700000000* 10**18, October1st, InvestorEndVestingBlock, true);
+
+        lock(0xEbEC1c6317dC6fD6130DA4E9ce4FaFb84e698401, 300000 * 10**18, October1st, InvestorEndVestingBlock, false);
     }
 
     /**

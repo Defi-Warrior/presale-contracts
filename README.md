@@ -11,6 +11,8 @@
 
 ## Mainnet
 
+Locker v3: Extend lock time for 3 months: 0x3c4325B19466e985B976D8b2e740238d3bf13f0f
+
 Presale Addr: 0xb5719AC1D38F3995d1a68e505c544dfB1cB7b007
 
 FIWA Token: 0x633237C6FA30FAe46Cc5bB22014DA30e50a718cC
