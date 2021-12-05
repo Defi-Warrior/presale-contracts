@@ -42,8 +42,8 @@ contract LockerV2 is Ownable, ILocker {
     uint public InvestorEndVestingBlock = October1st + 28800*365;
     // 4 years
     uint public EcosystemEndVestingBlock = October1st + (28800*365*4);
-    // 14020845 <=> January 1st 2022
-    uint public DevAndFouderStartVestingBlock = 14020845;
+    // 14020845 <=> April 1st 2022
+    uint public DevAndFouderStartVestingBlock = 16612845;
     // 15 months
     uint public DevAndFouderEndVestingBlock = DevAndFouderStartVestingBlock + 28800*(365 + 90);
 
@@ -181,11 +181,12 @@ contract LockerV2 is Ownable, ILocker {
         lock(0x7DD3796cd92C40Ac9C0F5dA27D06eCefeE7F7715, 16666667* 10**18, October1st, InvestorEndVestingBlock, true);
         lock(0x382f421B79FCB9209Aaa06A11fCDaceB88aBF00E, 33333333* 10**18, October1st, InvestorEndVestingBlock, true);
         
-        lock(0xa7b0774393e779ef7Ea31698FC26B42945932100, 2000000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, true);
-        lock(0xd795660CEFE21D76bC6373e46F0573aAF074f28e, 3000000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, true);
-        lock(0x4a424AeA347861CFbB70ba92c9eaa40e48073BF1, 1000000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, true);
-        lock(0x012Aae91e428f375b3179Ff0B6B5942C0C1c1566, 1000000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, true);
-        lock(0xA0dd2363A93cC758dc1199B3Efae555cd447F3fB, 700000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, true);
+        lock(0xa7b0774393e779ef7Ea31698FC26B42945932100, 2000000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, false);
+        lock(0xd795660CEFE21D76bC6373e46F0573aAF074f28e, 3000000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, false);
+        lock(0x4a424AeA347861CFbB70ba92c9eaa40e48073BF1, 1000000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, false);
+        lock(0x012Aae91e428f375b3179Ff0B6B5942C0C1c1566, 1000000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, false);
+        lock(0xA0dd2363A93cC758dc1199B3Efae555cd447F3fB, 700000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, false);
+        lock(0xbF2856540bFc4c96448eA90e978e82610f16545A, 13333333 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, false);
     }
 
     function lockDevelopers() internal {
