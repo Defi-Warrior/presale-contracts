@@ -12,6 +12,7 @@
 ## Mainnet
 
 Locker v4: Extend lock time for 3 months (and add more investors): 0xEcF6E3b38743b248c0C54528513EF8F6D2Ff3E20
+Locker v5: add 1 more partner:      
 
 Presale Addr: 0xb5719AC1D38F3995d1a68e505c544dfB1cB7b007
 

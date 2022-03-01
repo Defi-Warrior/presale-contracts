@@ -180,6 +180,7 @@ contract LockerV2 is Ownable, ILocker {
         lock(0x50899582199c06d5264edDCD12879E5210783Ba8, 666667* 10**18, October1st, InvestorEndVestingBlock, true);
         lock(0x7DD3796cd92C40Ac9C0F5dA27D06eCefeE7F7715, 16666667* 10**18, October1st, InvestorEndVestingBlock, true);
         lock(0x382f421B79FCB9209Aaa06A11fCDaceB88aBF00E, 33333333* 10**18, October1st, InvestorEndVestingBlock, true);
+        lock(0x9B8e5F18c4aAfE8284C62A05f6620D496ee33F06, 1038091 * 10**18, 15672532, 15672532 + 121*28800, true);
         
         lock(0xa7b0774393e779ef7Ea31698FC26B42945932100, 2000000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, false);
         lock(0xd795660CEFE21D76bC6373e46F0573aAF074f28e, 3000000 * 10**18, DevAndFouderStartVestingBlock, DevAndFouderEndVestingBlock, false);
@@ -236,7 +237,8 @@ contract LockerV2 is Ownable, ILocker {
      */
     function getLockedAmount(address addr) public view returns(uint256) {
         LockRecord memory lockRecord = lockRecords[addr];
-        lockRecord.end += LockDuration;
+        uint additionalLockTime = lockRecord.start > PhaseOneEndBlock + LockDuration ? 0 : LockDuration;
+        lockRecord.end += additionalLockTime;
 
         // unlock 5% of fund after IDO start
         if (block.number >= IDOStartBlock && lockRecord.unlockAfterIDO)
@@ -257,7 +259,7 @@ contract LockerV2 is Ownable, ILocker {
             unlockedAmount = lockRecord.rewardPerBlock * (PhaseOneEndBlock - lockRecord.start);
 
         if (block.number > PhaseOneEndBlock + LockDuration)
-            unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start - LockDuration);
+            unlockedAmount = lockRecord.rewardPerBlock * (block.number - lockRecord.start - additionalLockTime);
 
         // need this check because we unlock 5% when IDO start
         if (unlockedAmount <= lockRecord.lockAmount)
